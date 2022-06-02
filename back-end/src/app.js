@@ -7,10 +7,12 @@ require("dotenv").config({
 require("./db/mongoose");
 
 const userRouter = require("./routers/user.router");
+const productRouter = require("./routers/product.router");
 
 const app = express();
 
 app.use(express.json());
 app.use(userRouter);
+app.use(productRouter);
 
 module.exports = app;
