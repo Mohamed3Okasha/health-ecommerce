@@ -17,7 +17,13 @@ const productSchema = new mongoose.Schema({
     },
     images: [
         String
-    ]
+    ],
+    count: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0
+    }
 }, 
 {
     timestamps: true
