@@ -18,16 +18,12 @@ const productSchema = new mongoose.Schema({
     images: [
         String
     ],
-    categories: [
-        {
-            type: mongoose.Schema.Types.ObjectId, 
-            ref: 'Category'
-        }
-    ],
-    brand: { 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Brand' 
-    } 
+    count: {
+        type: Number,
+        required: true,
+        min: 0,
+        default: 0
+    }
 }, 
 {
     timestamps: true

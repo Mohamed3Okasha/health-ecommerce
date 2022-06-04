@@ -6,7 +6,10 @@ const router = new express.Router();
 
 router.get('/products', async (req, res) => {
     try {
-        const products = await Product.find();
+        const searchQuery = req.query.q;
+        const products = await Product.find(searchQuery? 
+            {name: new RegExp(searchQuery, "i")} 
+            : {});
         res.send(products);
     }
     catch (e) {
