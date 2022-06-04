@@ -10,7 +10,9 @@ const userRouter = require("./routers/user.router");
 const productRouter = require("./routers/product.router");
 
 const app = express();
+const cors = require("cors");
 
+app.use(cors());
 app.use(express.json());
 app.use(userRouter);
 app.use(productRouter);
