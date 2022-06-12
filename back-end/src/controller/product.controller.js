@@ -4,9 +4,10 @@ class Product {
   static getProducts = async (req, res) => {
     try {
       const searchQuery = req.query.q;
-      const products = await productModel.find(
-        searchQuery ? { name: new RegExp(searchQuery, "i") } : {}
-      );
+      const products = await productModel
+        .find(searchQuery ? { name: new RegExp(searchQuery, "i") } : {})
+        .populate("category")
+        .populate("brand");
       res.send(products);
     } catch (e) {
       res.status(400).send(e.message);
@@ -15,7 +16,10 @@ class Product {
 
   static getProduct = async (req, res) => {
     try {
-      const product = await productModel.findById(req.params.id);
+      const product = await productModel
+        .findById(req.params.id)
+        .populate("category")
+        .populate("brand");
       res.send(product);
     } catch (e) {
       res.status(400).send(e.message);

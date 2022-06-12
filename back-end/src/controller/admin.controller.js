@@ -25,9 +25,13 @@ class Admin {
 
   static updateBrand = async (req, res) => {
     try {
-      const brand = await brandModel.findOneAndUpdate(req.params.id, req.body, {
-        returnDocument: "after",
-      });
+      const brand = await brandModel.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          returnDocument: "after",
+        }
+      );
       res.send(brand);
     } catch (e) {
       res.status(400).send(e.message);
@@ -68,7 +72,7 @@ class Admin {
 
   static updateCategory = async (req, res) => {
     try {
-      const brand = await categoryModel.findOneAndUpdate(
+      const brand = await categoryModel.findByIdAndUpdate(
         req.params.id,
         req.body,
         {
@@ -111,7 +115,7 @@ class Admin {
 
   static updateProduct = async (req, res) => {
     try {
-      const product = await productModel.findOneAndUpdate(
+      const product = await productModel.findByIdAndUpdate(
         req.params.id,
         req.body,
         {
