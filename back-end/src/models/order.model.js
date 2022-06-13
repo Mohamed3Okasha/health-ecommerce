@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const cartSchema = new mongoose.Schema(
+const orderSchema = new mongoose.Schema(
     {
         user_id: {
             type: mongoose.Schema.Types.ObjectId,
@@ -12,7 +12,7 @@ const cartSchema = new mongoose.Schema(
                 product_id: {
                     type: mongoose.Schema.Types.ObjectId,
                     required: true,
-                    ref: "Product"
+                    ref: "User"
                 },
                 name: {
                     type: String,
@@ -31,6 +31,26 @@ const cartSchema = new mongoose.Schema(
                 }
             }
         ],
+        status: {
+            type: String,
+            enum: [
+                "pending",
+                "in review",
+                "in progress",
+                "canceled",
+                "on the way",
+                "delivered",
+            ],
+            default: "pending",
+        },
+        payment_method: {
+            type: String,
+            enum: [
+                "credit card",
+                "cash on delivery",
+            ],
+            required: true,
+        },
         subtotal: {
             type: Number,
             required: true,
@@ -42,6 +62,6 @@ const cartSchema = new mongoose.Schema(
     }
 );
 
-const Cart = mongoose.model("Cart", cartSchema);
+const Order = mongoose.model("Order", orderSchema);
 
-module.exports = Cart;
+module.exports = Order;
