@@ -23,14 +23,8 @@ const ProductForm = (props) => {
     useEffect( () => {
         if(id !== 'new'){
            let findProduct = props.products.find(p => p._id === id);
-        //    console.log(findProduct)
-            // setProductData(props.products.find(p => p._id === id))
-            let cloneProductData = {...productData}
-            console.log('cloneProductData: ', cloneProductData)
-           for (let item in cloneProductData){
-             cloneProductData[item] = findProduct[item];
-           }
-           setProductData(cloneProductData);
+           console.log('findProduct: ',findProduct)
+           setProductData(findProduct);
         }
     },[])
  
@@ -56,6 +50,7 @@ const ProductForm = (props) => {
                     <div className="mb-3">
                         <label htmlFor="inputCategory" className="form-label">Category</label>
                         <select 
+                        value = {productData.category._id}
                         onChange={handleChange}
                         name="category" id="inputCategory" className="form-select">
                             {/* the option value should = the id sent by the API */}
@@ -66,6 +61,7 @@ const ProductForm = (props) => {
                     <div className="mb-3">
                         <label htmlFor="inputBrand" className="form-label">Brand</label>
                         <select 
+                        value = {productData.brand._id}
                         onChange={handleChange}
                         name="brand" id="inputBrand" className="form-select">
                             <option value="nothing">Select a brand</option>

@@ -187,22 +187,29 @@ class App extends Component {
         console.log('this.state.logedUser: ', this.state.logedUser)
         if(id !== 'new'){
             console.log('Here in Edit Product');
-            axios.put(`${prodAPI}/products/${id}`, {name: productData.name, price: productData.price}, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
+            axios.put(`${prodAPI}/products/${productData._id}`, {name: productData.name, price: productData.price, description: productData.description, count: productData.count}, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
             .then(res => console.log('res: ', res));
             //Quest ===> when I update products shall I call the componentDidMount somehow? in order to fetch products with nre edits
+            let cloneProducts = [...this.state.products];
+            let findProd = cloneProducts.find(p => p._id === productData._id)
+            findProd.count = productData.count;
+            this.setState({products:cloneProducts})
         }
         else{
             console.log('Here in Add  New Product');
             axios.post(`${prodAPI}/products`, productData, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
             .then(res => console.log('res: ', res));
-        }
-        
+        } 
     }
 
     handleDeleteProduct = (id) => {
         console.log('Entered handleDeleteProduct');
         axios.delete(`${prodAPI}/products/${id}`, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
         .then(res => console.log(res));
+        let cloneProducts = [...this.state.products]
+        cloneProducts = cloneProducts.filter(p => p._id !== id);
+        // console.log('cloneProducts: ', cloneProducts);
+        this.setState({products:cloneProducts})
     }
 
     render() { 
