@@ -94,17 +94,14 @@ class User {
         const newCart = new cartModel(
           {
           user_id: req.user._id,
-          items: [
-            {
+          items: [{
               product_id: productId,
               quantity: quantity,
               name: product.name,
               price: product.price
-            }
-          ]
-          }
-          );
-          cart.subtotal = product.price * quantity;
+            }],
+          subtotal: product.price * quantity
+          });
         await newCart.save();
         res.status(201).send(newCart);
       }
