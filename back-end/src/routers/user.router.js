@@ -19,4 +19,8 @@ router.get("/cart", auth, userController.showCart);
 
 router.delete("/cart", auth, userController.removeFromCart);
 
+router.get("/orders", auth, userController.showOrders);
+
+router.post("/addOrder", auth, userController.createOrder);
+
 module.exports = router;
