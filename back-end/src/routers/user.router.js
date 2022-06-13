@@ -13,4 +13,6 @@ router.post("/users/logoutAll", auth, userController.logoutAll);
 
 router.get("/users/me", auth, userController.me);
 
+router.post("/cart", auth, userController.addToCart);
+
 module.exports = router;

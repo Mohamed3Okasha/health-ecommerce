@@ -1,4 +1,5 @@
 const userModel = require("../models/user.model");
+const cartModel = require("../models/cart.model");
 const { sendWelcomeEmail } = require("../emails/account");
 
 class User {
@@ -53,6 +54,48 @@ class User {
   static me = async (req, res) => {
     res.send(req.user);
   };
+
+  static addToCart = async (req, res) => {
+
+    const {productId, quantity} = req.body;
+
+    try {
+      const cart = await cartModel.findOne({user_id: req.user._id});
+      if (cart) {
+        const itemIndex = cart.items.findIndex(p => p.product_id == productId);
+        if (itemIndex >= 0) {
+          const productItem = cart.items[itemIndex];
+          console.log(productItem)
+          productItem.quantity += quantity;
+          cart.items[itemIndex] = productItem;
+        }
+        else {
+          cart.items.push({ product_id: productId, quantity: quantity});
+        }
+        await cart.save();
+        res.send(cart)
+      }
+
+      else {
+        const newCart = new cartModel(
+          {
+          user_id: req.user._id,
+          items: [
+            {
+              "product_id": productId,
+              "quantity": quantity
+            }
+          ]
+          }
+          );
+        await newCart.save();
+        res.status(201).send(newCart);
+      }
+    }
+    catch (e) {
+      res.status(400).send(e.message);
+    }
+  }
 }
 
 module.exports = User;
