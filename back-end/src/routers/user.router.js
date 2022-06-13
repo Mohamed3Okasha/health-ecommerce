@@ -15,4 +15,8 @@ router.get("/users/me", auth, userController.me);
 
 router.post("/cart", auth, userController.addToCart);
 
+router.get("/cart", auth, userController.showCart);
+
+router.delete("/cart", auth, userController.removeFromCart);
+
 module.exports = router;
