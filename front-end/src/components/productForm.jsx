@@ -6,6 +6,7 @@ import { useParams } from 'react-router-dom';
 const ProductForm = (props) => {
 
     const {id} = useParams();
+    
 
     let[productData, setProductData] = useState({
         brand: "",
@@ -14,8 +15,21 @@ const ProductForm = (props) => {
         price: "",
         description:"",
         count: "",
-        images:["https://via.placeholder.com/300x200.png", "https://via.placeholder.com/700x321.png"]
+        // images:["https://via.placeholder.com/300x200.png", "https://via.placeholder.com/700x321.png"]
     });
+    
+    let[newCategory, setNewCategory]  = useState({
+        name:'',
+        description: ''
+    })
+    let[newBrand, setNewBrand]  = useState({
+        name:'',
+        description: ''
+    })
+
+    let categoryStyle = productData.category === 'other' ? {display:'block'} : {display:'none'};
+    let brandStyle = productData.brand === 'other' ? {display:'block'} : {display:'none'};
+
 
     // let[categoryList, setCategoryList] = useState(['Devices', 'Cosmotics', 'Vitamins'])
     // let[brandList, setBrandList] = useState(['Company 1', 'Company 2', 'Company 3'])
@@ -23,7 +37,7 @@ const ProductForm = (props) => {
     useEffect( () => {
         if(id !== 'new'){
            let findProduct = props.products.find(p => p._id === id);
-           console.log('findProduct: ',findProduct)
+        //    console.log('findProduct: ',findProduct)
            setProductData(findProduct);
         }
     },[])
@@ -32,12 +46,12 @@ const ProductForm = (props) => {
         let cloneProductData = {...productData};
         cloneProductData[e.target.name] = e.target.value;
         setProductData(cloneProductData);
-        console.log(cloneProductData);
+        // console.log(cloneProductData);
     }
 
     const handleAddEditProductForm = e => {
         e.preventDefault();
-        props.handleAddEditProduct(productData, id);
+        props.handleAddEditProduct(productData, id, newCategory, newBrand);
     }
 
     return ( 
@@ -50,23 +64,53 @@ const ProductForm = (props) => {
                     <div className="mb-3">
                         <label htmlFor="inputCategory" className="form-label">Category</label>
                         <select 
-                        value = {productData.category._id}
+                        value = {productData.category.name}
                         onChange={handleChange}
                         name="category" id="inputCategory" className="form-select">
                             {/* the option value should = the id sent by the API */}
                             <option value="nothing">Select a category</option>
-                            {props.categoryList.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+                            {props.categoryList.map(c => <option key={c._id} value={c.name}>{c.name}</option>)}
+                            <option value="other">Other(Add new category)</option>
                         </select>
+                        <div className="border rounded border-3 border-secondary my-3 p-3" style={categoryStyle}>
+                            <label htmlFor="inputNewCategoryName" className="form-label">Category name</label>
+                            <input
+                                name="newCategoryName"
+                                value={newCategory.name}
+                                onChange={handleChange}
+                                type="text" className="form-control" id="inputNewCategoryName" />
+                            <label htmlFor="inputNewCategoryDescription" className="form-label">Category description</label>
+                            <input 
+                                name="newCategoryDescription"
+                                value={newCategory.description}
+                                onChange={handleChange}
+                                type="text" className="form-control" id="inputNewCategoryDescription" />
+                        </div>
                     </div>
                     <div className="mb-3">
                         <label htmlFor="inputBrand" className="form-label">Brand</label>
                         <select 
-                        value = {productData.brand._id}
+                        value = {productData.brand.name}
                         onChange={handleChange}
                         name="brand" id="inputBrand" className="form-select">
                             <option value="nothing">Select a brand</option>
-                            {props.brandList.map(b => <option key={b._id} value={b._id}>{b.name}</option>)}
+                            {props.brandList.map(b => <option key={b._id} value={b.name}>{b.name}</option>)}
+                            <option value="other">Other(Add new brand)</option>
                         </select>
+                        <div className="border rounded border-3 border-secondary my-3 p-3" style={brandStyle}>
+                            <label htmlFor="inputNewBrandName" className="form-label">Brand name</label>
+                            <input
+                                name="newBrandName"
+                                value={newBrand.name}
+                                onChange={handleChange}
+                                type="text" className="form-control" id="inputNewBrandName" />
+                            <label htmlFor="inputNewBrandDescription" className="form-label">Brand description</label>
+                            <input 
+                                name="newBrandDescription"
+                                value={newBrand.description}
+                                onChange={handleChange}
+                                type="text" className="form-control" id="inputNewBrandDescription" />
+                        </div>
                     </div>
                     <div className="mb-3">
                     <label htmlFor="exampleInputName" className="form-label">Product Name</label>
@@ -75,7 +119,6 @@ const ProductForm = (props) => {
                         value={productData.name}
                         onChange={handleChange}
                     type="text" className="form-control" id="exampleInputName" aria-describedby="emailHelp" />
-                    <div id="emailHelp" className="form-text">We'll never share your email with anyone else.</div>
                     </div>
                     <div className="mb-3">
                     <label htmlFor="exampleInputPrice" className="form-label">Price</label>

@@ -35,7 +35,7 @@ const Menu = (props) => {
                             <MenuProduct 
                             key = {p._id}
                             product = {p}
-                            onSelect = {props.handleSelect}
+                            onAddProduct = {props.handleSelectProductToCart}
                             />
                         )
                     })}
