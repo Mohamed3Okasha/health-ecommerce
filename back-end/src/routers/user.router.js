@@ -23,4 +23,12 @@ router.get("/orders", auth, userController.showOrders);
 
 router.post("/addOrder", auth, userController.createOrder);
 
+router.get("/addresses",auth, userController.showAddresses);
+
+router.post("/address", auth, userController.addAddress);
+
+router.put("/address/:id", auth, userController.updateAddress);
+
+router.delete("/address/:id", auth, userController.deleteAddress);
+
 module.exports = router;
