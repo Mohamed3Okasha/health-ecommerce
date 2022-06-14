@@ -66,6 +66,7 @@ class User {
       const product = await productModel.findById(productId);
       if (!product) {
         res.status(404).send("Product not found");
+        return;
       }
       const cart = await cartModel.findOne({user_id: req.user._id});
       if (cart) {
