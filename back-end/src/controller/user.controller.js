@@ -150,7 +150,8 @@ class User {
           user_id: req.user._id,
           items: cart.items,
           subtotal: cart.subtotal,
-          payment_method: req.body.payment_method
+          payment_method: req.body.payment_method,
+          address_id: req.body.address_id
         }
         );
       await order.save();
