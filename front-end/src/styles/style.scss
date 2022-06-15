@@ -1,0 +1,11 @@
+@import '../../node_modules/bootstrap/scss/bootstrap.scss';
+
+.form-check-input[type="radio"]:checked{
+    background-color:gray;
+    border-color: none;
+}
+
+.disableForm{
+    pointer-events: none;
+    opacity: .4;
+}

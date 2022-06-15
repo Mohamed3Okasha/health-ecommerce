@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import Product from './product';
+import CartProduct from './cartProduct';
+import Payment from './payment';
 
 
 class ShoppingCart extends Component {
     closeCartRef = React.createRef();
-
 
     constructor(props){
         super(props);
@@ -28,48 +28,28 @@ class ShoppingCart extends Component {
 
         return (
             <React.Fragment>
-                <div className="modal fade" id="cartModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog modal-dialog-centered">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            {/* <h5 className="modal-title" id="exampleModalLabel">Modal title</h5> */}
-                            <button type="button" ref={this.closeCartRef} className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        {/* <div className="container"> */}
-                        <div className="modal-body">
-                            
-                            <div className="container">
-                                <div className="row">
-                                    <div className="">
-                                    {/* col-sm-8 */}
-                                        {/* Reset Button */}
-                                        {/* <button onClick={this.props.onReset} className="btn btn-secondary btn-sm p-2">Reset</button> */}
-                                        {this.props.products.filter(p => p.isSelected === true).map((product) =>(
-                                            <Product 
-                                                key={product._id} 
-                                                product = {product} 
-                                                handleDelete={this.props.handleDelete}
-                                                onIncrement = {this.props.onIncrement}
-                                                />
-                                        ))}
-                                    </div>
-                                    {/* <div className="col-sm-4">
-                                        ...
-                                    </div> */}
-                                </div>
-                            </div>
-                            
-                        </div>
-                        <div className="modal-footer justify-content-start">
-                            <button type="submit" className="btn btn-primary px-5">Confirm</button>
-                        </div>
-                        {/* </div> */}
+                <div className="container my-5 bg-light p-3 border border-secondary rounded">
+                  <div className="row justify-content-center">
+                    <div className="col-sm-7 col-xl-6 text-center">
+                      {this.props.products.filter(p => p.isSelected === true && p.selectedQuantity > 0).map((product) =>(
+                        <CartProduct 
+                            key={product._id} 
+                            product = {product} 
+                            handleSelectProductToCart={this.props.handleSelectProductToCart}
+                            handleIncrementDecrementQuantity = {this.props.handleIncrementDecrementQuantity}
+                            />
+                      ))}
                     </div>
+                    <div className="col-sm-5 col-xl-4  text-center">
+                      <div className="card bg-primary text-white rounded-3">
+                        <Payment 
+                          subTotal = {this.props.products.filter(p => p.isSelected === true).reduce((total, product)=> total + product.price, 0)}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-            </div>
-
-                
-            </React.Fragment>
+              </React.Fragment>
         );
     }
 

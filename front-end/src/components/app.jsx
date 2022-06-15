@@ -11,11 +11,11 @@ import ShoppingCart from './shoppingCart';
 import ProductDetails from './productDetails';
 import NotFound from './notFound';
 import Menu from './menu';
-// import Login from './login';
 import SignUp from './signUp';
 import ProductForm from './productForm';
 import Admin from './admin';
 import NavBarAdmin from './navBarAdmin';
+import AdminDashBoard from './adminDashboard';
 const prodAPI = 'https://healthecommerce.herokuapp.com';
 // let token = '';
 // const qs = require('qs');
@@ -29,8 +29,7 @@ class App extends Component {
             token: ''
         },
         categoryList: [],
-        brandList: [],
-        categoryList: []
+        brandList: []    
     } 
 
     constructor(){
@@ -46,60 +45,58 @@ class App extends Component {
     }
 
     async componentDidMount(){
-        // document.cookie = '';
         console.log('App: componentDidMount');
         const {data} = await axios.get(`${prodAPI}/products`);
+        let showCartResponse;
+        if(this.state.logedUser.token !== ''){
+            showCartResponse = await axios.get(`${prodAPI}/cart`, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}});
+            console.log('App - componentDidMount - showCartResponse: ', showCartResponse.data.items)
+        }
         console.log('products from api: ', data)
         for (let p in data){
             data[p].isSelected = false;
-            // data[p].count = 3;
+            if(showCartResponse){
+                data[p].selectedQuantity = 0;
+            }
+        }
+        if(showCartResponse){
+            showCartResponse.data.items.forEach( item => {
+                let targetProduct = data.find(p => p._id === item.product_id);
+                targetProduct.isSelected = true;
+                targetProduct.selectedQuantity = item.quantity;
+            });
         }
         this.setState({products:data});
-
-        // let cloneLogedUser = {...this.state.logedUser};
-        // let arrCookies = this.arrangedCookies();
-        // console.log('componentDidMount arrCookies: ', arrCookies);
-        // for(let cookie in arrCookies){
-        //     cloneLogedUser[cookie] = arrCookies[cookie];
-        // }
-        // console.log('cloneLogedUser: ', cloneLogedUser)
-        // this.setState({logedUser : cloneLogedUser});
-
-        const responseBrands = await axios.get(`${prodAPI}/brands`, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
-        console.log('responseBrands: ', responseBrands.data)
-        this.setState({brandList: responseBrands.data})
-        const responseCategories = await axios.get(`${prodAPI}/categories`, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
-        console.log('responseCategories: ', responseCategories);
-        this.setState({categoryList: responseCategories.data})
+        const brandsResponse = await axios.get(`${prodAPI}/brands`);
+        console.log('brandsResponse: ', brandsResponse.data);
+        this.setState({brandList: brandsResponse.data});
+        const categoriesResponse = await axios.get(`${prodAPI}/categories`);
+        console.log('categoriesResponse: ', categoriesResponse);
+        this.setState({categoryList: categoriesResponse.data});
     }
 
     checkLoginDetails = (user) => {
         console.log(user);
         axios.post(`${prodAPI}/users/login`, user)
         .then(res => {
-                    console.log(res);
-                    this.setState({logedUser:{...res.data.user, userRole:'admin', token : res.data.token}});
-                    for(let item of Object.entries(res.data.user)){
-                    this.setCookie(item[0], item[1]);
-                   }
-                   this.setCookie('userRole', 'admin');
-                   this.setCookie('token', res.data.token);
-                //    console.log(this.arrangedCookies());
-                    // console.log('logedUser: ', this.state.logedUser);
+            // console.log(res);
+            this.setState({logedUser:{...res.data.user, token : res.data.token}});
+            for(let item of Object.entries(res.data.user)){
+                this.setCookie(item[0], item[1]);
+            }
+            this.setCookie('token', res.data.token);
         })
         .catch(err => console.log("err: ", err))
     }
 
     handleLogout = () => {
         console.log('Entered handleLogout');
-        // document.cookie = '';
         let arrCookies = this.arrangedCookies();
         for(let cookie in arrCookies){
             // console.log(cookie, arrCookies[cookie]);
             this.deleteCookie(cookie);
         }
         let cloneLogedUser = {...this.state.logedUser};
-        // this.forceUpdate();
         for(let item in cloneLogedUser){
             cloneLogedUser[item] = '';
         }
@@ -127,15 +124,6 @@ class App extends Component {
         return cookiesArr;
     }
 
-    handleCartDelete = (recievedProduct)=> {
-        console.log(recievedProduct);
-        //1.Clone State
-        //2.Edit
-        //3.setState
-        let clonedProducts =  this.state.products.filter(p => p.id !== recievedProduct.id);
-        this.setState({products:clonedProducts});
-    };
-
     handleReset = ()=> {
         let clonedProducts = [...this.state.products];
         clonedProducts = clonedProducts.map(p =>{
@@ -146,28 +134,60 @@ class App extends Component {
         console.log(this.state.products)
     }
 
-    handleIncrement = (product) => {
-        console.log("plus");
-        // this.setState({count:this.props.product.count + 1})
+    handleIncrementDecrementQuantity = async (recievedProduct, operator) => {
         let clonedProducts = [...this.state.products];
-        let prodIndex = clonedProducts.indexOf(product);
-        clonedProducts[prodIndex] = {...clonedProducts[prodIndex]}
-        clonedProducts[prodIndex].count++;
-        this.setState({products:clonedProducts})
+        let targetProduct = clonedProducts.find(p => p._id === recievedProduct._id);
+        let addToCartrResponse;
+        if(operator === '+'){
+            targetProduct.selectedQuantity++;
+            addToCartrResponse = await axios.post(`${prodAPI}/cart`,{"productId": targetProduct._id, "quantity": targetProduct.selectedQuantity} ,{headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
+            console.log('App - handleIncrementDecrementQuantity - addToCartrResponse Increment: ', addToCartrResponse)
+        }
+        else if(operator === '-'){
+            if(targetProduct.selectedQuantity <= 1){
+                this.handleSelectProductToCart(targetProduct);
+            }
+            else{
+                targetProduct.selectedQuantity--;
+                addToCartrResponse = await axios.post(`${prodAPI}/cart`,{"productId": targetProduct._id, "quantity": targetProduct.selectedQuantity} ,{headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
+                console.log('App - handleIncrementDecrementQuantity - addToCartrResponse Decrement: ', addToCartrResponse);
+            }
+        }
+        if(addToCartrResponse.status === 201){
+            this.setState({products:clonedProducts})
+        }
     } 
 
-    handleSelect = (selectedProduct) =>{
-        // console.log('products once selected a product: ',this.state.products);
-
+    handleSelectProductToCart = async (selectedProduct) =>{
+        console.log('App - handleSelectProductToCart - state products: ', this.state.products);
+        console.log('App - handleSelectProductToCart - selectedProduct: ', selectedProduct);
         let clonedProducts = [...this.state.products];
         const indx = clonedProducts.indexOf(selectedProduct);
-        console.log('index: ', indx);
         clonedProducts[indx] = {...clonedProducts[indx]};
-        clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
-        console.log('clonedProducts: ',clonedProducts)
-        this.setState({
-            products:clonedProducts
-        });
+
+        if(!selectedProduct.isSelected){
+            const addToCartrResponse = await axios.post(`${prodAPI}/cart`,{"productId": selectedProduct._id, "quantity": 1} ,{headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
+            console.log('App - handleSelectProductToCart - addToCartrResponse: ', addToCartrResponse)
+            if(addToCartrResponse.status === 201){
+                clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
+                clonedProducts[indx].selectedQuantity = 1;
+                console.log('AddToCart - clonedProducts: ',clonedProducts)
+                this.setState({
+                    products:clonedProducts
+                });
+            }
+        }
+        else{
+            console.log("productId", selectedProduct._id)
+            const removeFromCartResponse = await axios.delete(`${prodAPI}/cart`, { headers: {Authorization: `Bearer ${this.state.logedUser.token}`} , data: {"productId": selectedProduct._id}});
+            console.log('App - removeFromCartResponse: ', removeFromCartResponse);
+            if(removeFromCartResponse.status === 200){
+                clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
+                clonedProducts[indx].selectedQuantity = 0;
+                console.log('RemoveFromCart - clonedProducts: ',clonedProducts)
+                this.setState({products:clonedProducts});
+            }
+        }
         console.log('products: ',this.state.products);
 
     }
@@ -182,24 +202,59 @@ class App extends Component {
         })
     }
 
-    handleAddEditProduct = (productData, id) => {
-        // e.preventDefault();
-        console.log('this.state.logedUser: ', this.state.logedUser)
+    handleSearchProducts = async (searchWord) => {
+        const {data} = await axios.get(`${prodAPI}/products?q=${searchWord}`)
+        console.log('handleSearchProducts - data: ', data);
+        for (let p in data){
+            data[p].isSelected = false;
+            data[p].selectedQuantity = 0;
+        }
+        this.setState({products:data});
+    }
+
+    handleAddEditProduct = async (productData, id, newCategory, newBrand) => {
+        console.log('App - handleAddEditProduct - productData: ', productData)
+        if( productData.category === 'other'){
+            this.handleAddCategory(newCategory);
+        } else if( productData.brand === 'other'){
+            this.handleAddBrand(newBrand);
+        }
+        // console.log('this.state.logedUser: ', this.state.logedUser)
         if(id !== 'new'){
             console.log('Here in Edit Product');
-            axios.put(`${prodAPI}/products/${productData._id}`, {name: productData.name, price: productData.price, description: productData.description, count: productData.count}, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
-            .then(res => console.log('res: ', res));
+            const responseEditProd = await axios.put(`${prodAPI}/products/${productData._id}`, {name: productData.name, price: productData.price, description: productData.description, count: productData.count}, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
+            // .then(res => console.log('res: ', res));
             //Quest ===> when I update products shall I call the componentDidMount somehow? in order to fetch products with nre edits
-            let cloneProducts = [...this.state.products];
-            let findProd = cloneProducts.find(p => p._id === productData._id)
-            findProd.count = productData.count;
-            this.setState({products:cloneProducts})
+            console.log('App - handleAddEditProduct - responseEditProd: ', responseEditProd);
+            if(responseEditProd.status === 200){
+                let cloneProducts = [...this.state.products];
+                let findProd = cloneProducts.find(p => p._id === productData._id)
+                findProd.count = productData.count;
+                this.setState({products:cloneProducts})
+            }
         }
         else{
             console.log('Here in Add  New Product');
-            axios.post(`${prodAPI}/products`, productData, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}})
-            .then(res => console.log('res: ', res));
+            const responseAddProd = await axios.post(`${prodAPI}/addProduct`, productData, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}});
+            console.log('App - handleAddEditProduct - responseAddProd: ', responseAddProd);
+
+            if(responseAddProd.status === 200){
+                let cloneProducts = [...this.state.products];
+                cloneProducts.push(productData);
+                this.setState({products:cloneProducts});
+            }
         } 
+    }
+
+    handleAddCategory = async (nCategory) => {
+        const {data} = await axios.post(`${prodAPI}/addCategory`, nCategory, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}});
+        console.log('handleAddCategory - data', data);
+    }
+    handleAddBrand = async (nBrand) => {
+        const {data} = await axios.post(`${prodAPI}/addCategory`, nBrand, {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}});
+        console.log('handleAddBrand - data: ', data);
+        // const nBrandId = 1;
+
     }
 
     handleDeleteProduct = (id) => {
@@ -212,6 +267,14 @@ class App extends Component {
         this.setState({products:cloneProducts})
     }
 
+    handleDeleteCategory = (id) => {
+        console.log('App - handleDeleteCategory');
+    }
+
+    handleDeleteBrand = (id) => {
+        console.log('App - handleDeleteBrand');
+    }
+
     render() { 
         console.log('App: render');
         
@@ -219,12 +282,12 @@ class App extends Component {
         return (<React.Fragment>
             {(this.state.logedUser.userRole === "admin") && 
                 (<NavBarAdmin 
-                // productCount = {this.state.products.filter(p => p.count > 0 && p.isSelected === true).length}
-                productCount = {this.state.products.filter(p => p.isSelected === true).length}
+                // productCount = {this.state.products.filter(p => p.isSelected === true).length}
+                productCount = {this.state.products.filter(p => p.isSelected === true && p.selectedQuantity > 0).length}
                 products = {this.state.products}
                 onReset = {this.handleReset}
                 onIncrement = {this.handleIncrement}
-                handleDelete = {this.handleCartDelete}
+                // handleDelete = {this.handleCartDelete}
                 checkLoginDetails = {this.checkLoginDetails}
                 logedUser = {this.state.logedUser}
                 handleLogout = {this.handleLogout}
@@ -232,12 +295,11 @@ class App extends Component {
             }
             { (this.state.logedUser.userRole === '' || this.state.logedUser.userRole === "user") &&
             (    <NavBar 
-                    // productCount = {this.state.products.filter(p => p.count > 0 && p.isSelected === true).length}
-                    productCount = {this.state.products.filter(p => p.isSelected === true).length}
+                    productCount = {this.state.products.filter(p => p.isSelected === true && p.selectedQuantity > 0).length}
                     products = {this.state.products}
                     onReset = {this.handleReset}
                     onIncrement = {this.handleIncrement}
-                    handleDelete = {this.handleCartDelete}
+                    // handleDelete = {this.handleCartDelete}
                     checkLoginDetails = {this.checkLoginDetails}
                     logedUser = {this.state.logedUser}
                     handleLogout = {this.handleLogout}
@@ -251,26 +313,20 @@ class App extends Component {
                     <Route path="/" element={<Home 
                         userRole = {this.state.logedUser.userRole}
                         products = {this.state.products}
-                        handleSelect = {this.handleSelect}
+                        handleSelectProductToCart = {this.handleSelectProductToCart}
                         handleDeleteProduct = {this.handleDeleteProduct}
+                        handleSearchProducts = {this.handleSearchProducts}
                     />} />
                     <Route path="/home" element={<Navigate to = "/" />} />
                     <Route path='/cart' element={
                         <ShoppingCart 
                             products = {this.state.products}
                             onReset = {this.handleReset}
-                            onIncrement = {this.handleIncrement}
-                            handleDelete = {this.handleCartDelete}
+                            handleSelectProductToCart = {this.handleSelectProductToCart}
+                            handleIncrementDecrementQuantity = {this.handleIncrementDecrementQuantity}
                         />
                     } />
                     <Route path='/products/:id' element={<ProductDetails products={this.state.products}/>} />
-                    <Route path='/menu' element={<Menu 
-                        userRole = {this.state.logedUser.userRole}
-                        products = {this.state.products}
-                        handleSelect = {this.handleSelect}
-                        handleDeleteProduct = {this.handleDeleteProduct}
-                    />} />
-                    {/* <Route path='/login' element={<Login />} /> */}
                     <Route path='/register' element={<SignUp />}/>
                     <Route path='/productform/:id' element={<ProductForm 
                         products = {this.state.products}
@@ -282,6 +338,14 @@ class App extends Component {
                     products = {this.state.products}
                     handleDelete = {this.handleProductDelete}
                     />}/>
+                    <Route path='/dashboard' 
+                    element = {<AdminDashBoard 
+                        categoryList = {this.state.categoryList}
+                        brandList = {this.state.brandList}
+                        handleDeleteCategory = {this.handleDeleteCategory}
+                        handleDeleteBrand = {this.handleDeleteBrand}
+                    />}
+                    />
                     <Route path="*" element={<NotFound />} />
                 </Routes>
          

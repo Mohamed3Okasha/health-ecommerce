@@ -51,6 +51,11 @@ const orderSchema = new mongoose.Schema(
             ],
             required: true,
         },
+        address_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "Address"
+        },
         subtotal: {
             type: Number,
             required: true,

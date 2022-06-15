@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const MenuProductAdmin = (props) => {
-    // console.log(props.product)
+    // console.log('props.product.images[0].image: ', props.product)
     // const iconClassName = props.product.isSelected === true? 'bi bi-cart-plus-fill fs-4' : 'bi bi-cart-plus fs-4';
     return ( 
         <React.Fragment>
@@ -25,8 +25,8 @@ const MenuProductAdmin = (props) => {
                 <p>{props.product.name}</p>
                 <p>{props.product.price} EGP</p>
                 </div>
-                <p role='button' onClick={()=>{props.handleDeleteProduct(props.product._id)}}><i className="bi bi-trash3-fill fs-4"></i></p>
-                <Link to={`/productform/${props.product._id}`} className="text-dark">
+                <p role='button' onClick={()=>{props.handleDeleteProduct(props.product._id)}}><i className="bi bi-trash3-fill fs-4 text-danger"></i></p>
+                <Link to={`/productform/${props.product._id}`} className="">
                     <p role='button'><i className="bi bi-pencil-square fs-4"></i></p>
                 </Link>
             </div>

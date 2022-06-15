@@ -1,7 +1,8 @@
 const userModel = require("../models/user.model");
 const cartModel = require("../models/cart.model");
 const orderModel = require("../models/order.model");
-const productModel = require("../models/product.model")
+const productModel = require("../models/product.model");
+const addressModel = require("../models/address.model");
 const { sendWelcomeEmail } = require("../emails/account");
 
 class User {
@@ -65,6 +66,7 @@ class User {
       const product = await productModel.findById(productId);
       if (!product) {
         res.status(404).send("Product not found");
+        return;
       }
       const cart = await cartModel.findOne({user_id: req.user._id});
       if (cart) {
@@ -149,7 +151,8 @@ class User {
           user_id: req.user._id,
           items: cart.items,
           subtotal: cart.subtotal,
-          payment_method: req.body.payment_method
+          payment_method: req.body.payment_method,
+          address_id: req.body.address_id
         }
         );
       await order.save();
@@ -169,6 +172,61 @@ class User {
       res.status(400).send(e.message);
     }
   }
+
+  static showAddresses = async (req, res) => {
+    try {
+      const addresses = await addressModel.find({user_id: req.user._id});
+      res.send(addresses);
+    }
+    catch (e) {
+      res.status(400).send(e.message);
+    }
+  }
+
+  static addAddress = async (req, res) => {
+    try {
+      const address = new addressModel({user_id:req.user._id, ...req.body});
+      await address.save();
+      res.send(address);
+    } catch (e) {
+      res.status(400).send(e.message);
+    }
+  };
+
+  static updateAddress = async (req, res) => {
+    try {
+      const address = await addressModel.findOneAndUpdate(
+        {user_id: req.user._id, _id: req.params.id},
+        req.body,
+        {
+          returnDocument: "after",
+        }
+      );
+      if (!address) {
+        res.status(404).send("Address not found");
+      }
+      else {
+        res.send(address);
+      }
+    } catch (e) {
+      res.status(400).send(e.message);
+    }
+  };
+
+  static deleteAddress = async (req, res) => {
+    try {
+      const address = await addressModel.findOneAndDelete(
+          {user_id: req.user._id, _id: req.params.id});
+      if (!address) {
+        res.status(404).send("Address not found");
+      }
+      else {
+        res.send(address);
+      }
+    } catch (e) {
+      res.status(400).send(e.message);
+    }
+  };
 }
 
 module.exports = User;
