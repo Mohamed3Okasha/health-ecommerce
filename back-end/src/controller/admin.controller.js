@@ -14,15 +14,6 @@ class Admin {
     }
   };
 
-  static getAllBrands = async (req, res) => {
-    const brands = await brandModel.find();
-    try {
-      res.send(brands);
-    } catch (e) {
-      res.status(400).send(e.message);
-    }
-  };
-
   static updateBrand = async (req, res) => {
     try {
       const brand = await brandModel.findByIdAndUpdate(
@@ -56,15 +47,6 @@ class Admin {
       await category.save();
 
       res.status(201).send(category);
-    } catch (e) {
-      res.status(400).send(e.message);
-    }
-  };
-
-  static getAllCategories = async (req, res) => {
-    const categories = await categoryModel.find();
-    try {
-      res.send(categories);
     } catch (e) {
       res.status(400).send(e.message);
     }
