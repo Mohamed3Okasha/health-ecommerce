@@ -130,6 +130,8 @@ class User {
       const itemIndex = cart.items.findIndex(p => p.product_id == productId);
       if (itemIndex >= 0) {
         cart.items.splice(itemIndex, 1);
+        cart.subtotal = 0;
+        cart.items.forEach(product => cart.subtotal += (product.price * product.quantity));
         await cart.save();
         res.send(cart);
       }
@@ -146,6 +148,9 @@ class User {
   static createOrder = async (req, res) => {
     try {
       const cart = await cartModel.findOne({user_id: req.user._id});
+      if (!cart) {
+        res.status(400).send("Cannot initiate order when cart is empty");
+      }
       const order = new orderModel(
         {
           user_id: req.user._id,
@@ -157,6 +162,9 @@ class User {
         );
       await order.save();
       res.status(201).send(order);
+      cart.items = [];
+      cart.subtotal = 0;
+      await cart.save();
     }
     catch (e) {
       res.status(400).send(e.message);
