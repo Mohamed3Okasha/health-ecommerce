@@ -21,4 +21,9 @@ router.post("/addProduct", auth, adminAuth, adminController.addProduct);
 router.put("/products/:id", auth, adminAuth, adminController.updateProduct);
 router.delete("/products/:id", auth, adminAuth, adminController.deleteProduct);
 
+router.get("/statistics/income", auth, adminAuth, adminController.getIncomeStatistics);
+router.get("/statistics/newUsers", auth, adminAuth, adminController.getNewUserStatistics);
+router.get("/statistics/userStatus", auth, adminAuth, adminController.getUserStatistics);
+router.get("/statistics/orders", auth, adminAuth, adminController.getOrderStatistics);
+
 module.exports = router;
