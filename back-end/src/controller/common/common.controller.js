@@ -1,5 +1,5 @@
-const brandModel = require("../models/brand.model");
-const categoryModel = require("../models/category.model");
+const brandModel = require("../../models/brand.model");
+const categoryModel = require("../../models/category.model");
 
 class Common {
   static getAllBrands = async (req, res) => {

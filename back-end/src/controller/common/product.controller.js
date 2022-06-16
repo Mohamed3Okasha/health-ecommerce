@@ -1,4 +1,4 @@
-const productModel = require("../models/product.model");
+const productModel = require("../../models/product.model");
 
 class Product {
   static getProducts = async (req, res) => {
@@ -20,7 +20,11 @@ class Product {
         .findById(req.params.id)
         .populate("category")
         .populate("brand");
-      res.send(product);
+      if (product) {
+        res.send(product);
+      } else {
+        res.status(400).send("Product not found");
+      }
     } catch (e) {
       res.status(400).send(e.message);
     }

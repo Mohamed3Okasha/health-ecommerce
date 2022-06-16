@@ -7,7 +7,6 @@ require("dotenv").config({
 require("./db/mongoose");
 
 const userRouter = require("./routers/user.router");
-const productRouter = require("./routers/product.router");
 const adminRouter = require("./routers/admin.router");
 const commonRouter = require("./routers/common.router");
 
@@ -19,7 +18,6 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(userRouter);
-app.use(productRouter);
 app.use(adminRouter);
 app.use(commonRouter);
 
