@@ -583,7 +583,7 @@ class App extends Component {
                 />
               }
             />
-            <Route path="/statistics" element={<Statistics />} />
+            {/* <Route path="/statistics" element={<Statistics />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
