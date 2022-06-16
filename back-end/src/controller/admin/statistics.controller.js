@@ -1,18 +1,18 @@
 const userModel = require("../../models/user.model");
 const orderModel = require("../../models/order.model");
 
-class Stats {
+class Statistics {
   static getUserStatistics = async (req, res) => {
     try {
       const users = await userModel.find({ userRole: "user" });
-      const userStats = {
+      const userStatistics = {
         active: 0,
         deactivated: 0,
         suspended: 0,
         undefined: 0,
       };
-      users.forEach((user) => (userStats[user.status] += 1));
-      res.send(userStats);
+      users.forEach((user) => (userStatistics[user.status] += 1));
+      res.send(userStatistics);
     } catch (e) {
       res.status(400).send(e.message);
     }
@@ -78,4 +78,4 @@ class Stats {
   };
 }
 
-module.exports = Stats;
+module.exports = Statistics;

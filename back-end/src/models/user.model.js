@@ -39,6 +39,11 @@ const userSchema = new mongoose.Schema(
         }
       },
     },
+    status: {
+      type: String,
+      enum: ["active", "deactivated", "suspended"],
+      default: "deactivated",
+    },
     userRole: {
       type: String,
       enum: ["user", "admin"],
