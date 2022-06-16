@@ -1,8 +1,7 @@
 const brandModel = require("../../models/brand.model");
 
 class Brand {
-
-static addBrand = async (req, res) => {
+  static addBrand = async (req, res) => {
     const brand = new brandModel(req.body);
     try {
       await brand.save();

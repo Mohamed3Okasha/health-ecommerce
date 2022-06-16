@@ -22,8 +22,7 @@ class Product {
         .populate("brand");
       if (product) {
         res.send(product);
-      }
-      else {
+      } else {
         res.status(400).send("Product not found");
       }
     } catch (e) {

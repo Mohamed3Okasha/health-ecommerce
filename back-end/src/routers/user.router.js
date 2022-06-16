@@ -19,7 +19,7 @@ router.delete("/cart", auth, cartController.removeFromCart);
 router.get("/orders", auth, orderController.showOrders);
 router.post("/addOrder", auth, orderController.createOrder);
 
-router.get("/addresses",auth, addressController.showAddresses);
+router.get("/addresses", auth, addressController.showAddresses);
 router.post("/address", auth, addressController.addAddress);
 router.put("/address/:id", auth, addressController.updateAddress);
 router.delete("/address/:id", auth, addressController.deleteAddress);

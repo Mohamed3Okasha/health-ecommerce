@@ -12,7 +12,12 @@ router.put("/brands/:id", auth, adminAuth, brandController.updateBrand);
 router.delete("/brands/:id", auth, adminAuth, brandController.deleteBrand);
 
 router.post("/addCategory", auth, adminAuth, categoryController.addCategory);
-router.put("/categories/:id", auth, adminAuth, categoryController.updateCategory);
+router.put(
+  "/categories/:id",
+  auth,
+  adminAuth,
+  categoryController.updateCategory
+);
 router.delete(
   "/categories/:id",
   auth,
@@ -22,11 +27,36 @@ router.delete(
 
 router.post("/addProduct", auth, adminAuth, productController.addProduct);
 router.put("/products/:id", auth, adminAuth, productController.updateProduct);
-router.delete("/products/:id", auth, adminAuth, productController.deleteProduct);
+router.delete(
+  "/products/:id",
+  auth,
+  adminAuth,
+  productController.deleteProduct
+);
 
-router.get("/statistics/income", auth, adminAuth, statsController.getIncomeStatistics);
-router.get("/statistics/newUsers", auth, adminAuth, statsController.getNewUserStatistics);
-router.get("/statistics/userStatus", auth, adminAuth, statsController.getUserStatistics);
-router.get("/statistics/orders", auth, adminAuth, statsController.getOrderStatistics);
+router.get(
+  "/statistics/income",
+  auth,
+  adminAuth,
+  statsController.getIncomeStatistics
+);
+router.get(
+  "/statistics/newUsers",
+  auth,
+  adminAuth,
+  statsController.getNewUserStatistics
+);
+router.get(
+  "/statistics/userStatus",
+  auth,
+  adminAuth,
+  statsController.getUserStatistics
+);
+router.get(
+  "/statistics/orders",
+  auth,
+  adminAuth,
+  statsController.getOrderStatistics
+);
 
 module.exports = router;
