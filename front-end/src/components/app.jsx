@@ -376,17 +376,85 @@ class App extends Component {
     this.setState({ products: cloneProducts });
   };
 
-  handleDeleteCategory = (id) => {
+  handleDeleteCategory = async (categoryId) => {
     console.log("App - handleDeleteCategory");
+    const deleteCategoryResponse = await axios.delete(
+      `${prodAPI}/categories/${categoryId}`,
+      {
+        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+      }
+    );
+    if (deleteCategoryResponse.status === 200) {
+      let cloneCategoryList = [...this.state.categoryList];
+      this.setState({
+        categoryList: cloneCategoryList.filter((c) => c._id !== categoryId),
+      });
+    }
   };
 
-  handleDeleteBrand = (id) => {
+  handleEditCategory = async (categoryData) => {
+    const editCategoryResponse = await axios.put(
+      `${prodAPI}/categories/${categoryData.categoryId}`,
+      {
+        name: categoryData.categoryName,
+        description: categoryData.categoryDescription,
+      },
+      {
+        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+      }
+    );
+    if (editCategoryResponse.status === 200) {
+      let cloneCategoryList = [...this.state.categoryList];
+      let targetCategory = cloneCategoryList.find(
+        (c) => c._id === categoryData.categoryId
+      );
+      targetCategory.name = categoryData.categoryName;
+      targetCategory.description = categoryData.categoryDescription;
+      this.setState({
+        categoryList: cloneCategoryList,
+      });
+    }
+  };
+
+  handleDeleteBrand = async (brandId) => {
     console.log("App - handleDeleteBrand");
+    const deleteBrandResponse = await axios.delete(
+      `${prodAPI}/brands/${brandId}`,
+      {
+        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+      }
+    );
+    if (deleteBrandResponse.status === 200) {
+      let cloneBrandList = [...this.state.brandList];
+      this.setState({
+        brandList: cloneBrandList.filter((b) => b._id !== brandId),
+      });
+    }
+  };
+
+  handleEditBrand = async (brandData) => {
+    const editBrandResponse = await axios.put(
+      `${prodAPI}/brands/${brandData.brandId}`,
+      { name: brandData.brandName, description: brandData.brandDescription },
+      {
+        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+      }
+    );
+
+    if (editBrandResponse.status === 200) {
+      let cloneBrandList = [...this.state.brandList];
+      let targetBrand = cloneBrandList.find((b) => b._id === brandData.brandId);
+      targetBrand.name = brandData.brandName;
+      targetBrand.description = brandData.brandDescription;
+      this.setState({
+        brandList: cloneBrandList,
+      });
+    }
   };
 
   handleOrderCheckout = async (recievedPaymentDetails) => {
     console.log(
-      "App - recievedPaymentDetails: ",
+      "App - recievedPaymentDetails address Id: ",
       recievedPaymentDetails["shippingAddressId"]
     );
     if (recievedPaymentDetails.onDelivery) {
@@ -508,10 +576,14 @@ class App extends Component {
                   categoryList={this.state.categoryList}
                   brandList={this.state.brandList}
                   handleDeleteCategory={this.handleDeleteCategory}
+                  handleEditCategory={this.handleEditCategory}
                   handleDeleteBrand={this.handleDeleteBrand}
+                  handleEditBrand={this.handleEditBrand}
+                  logedUser={this.state.logedUser}
                 />
               }
             />
+            <Route path="/statistics" element={<Statistics />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
