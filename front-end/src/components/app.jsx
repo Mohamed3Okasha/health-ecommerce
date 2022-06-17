@@ -25,6 +25,7 @@ class App extends Component {
     addressList: [],
     categoryList: [],
     brandList: [],
+    forceLogin: false,
   };
 
   constructor() {
@@ -41,7 +42,7 @@ class App extends Component {
 
   async componentDidMount() {
     console.log("App: componentDidMount");
-    const { data } = await axios.get(`${prodAPI}/products`);
+    let getAllProductsResponse = await axios.get(`${prodAPI}/products`);
     let showCartResponse;
     let showAddressResponse;
     if (
@@ -51,41 +52,48 @@ class App extends Component {
       showCartResponse = await axios.get(`${prodAPI}/cart`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
       });
+      showAddressResponse = await axios.get(`${prodAPI}/addresses`, {
+        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+      });
       console.log(
         "App - componentDidMount - showCartResponse: ",
         showCartResponse.data.items
       );
+      console.log(
+        "App - componentDidMount - showAddressResponse: ",
+        showAddressResponse.data
+      );
+      this.setState({ addressList: showAddressResponse.data });
     }
-    showAddressResponse = await axios.get(`${prodAPI}/addresses`, {
-      headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-    });
-    console.log(
-      "App - componentDidMount - showAddressResponse: ",
-      showAddressResponse.data
-    );
-    this.setState({ addressList: showAddressResponse.data });
-    console.log("products from api: ", data);
-    for (let p in data) {
-      data[p].isSelected = false;
+
+    console.log("products from api: ", getAllProductsResponse.data);
+    for (let p of getAllProductsResponse.data) {
+      p.isSelected = false;
       if (showCartResponse) {
-        data[p].selectedQuantity = 0;
+        p.selectedQuantity = 0;
       }
     }
     if (showCartResponse) {
       showCartResponse.data.items.forEach((item) => {
-        let targetProduct = data.find((p) => p._id === item.product_id);
+        let targetProduct = getAllProductsResponse.data.find(
+          (p) => p._id === item.product_id
+        );
         targetProduct.isSelected = true;
         targetProduct.selectedQuantity = item.quantity;
       });
     }
-    this.setState({ products: data });
 
     const brandsResponse = await axios.get(`${prodAPI}/brands`);
     console.log("brandsResponse: ", brandsResponse.data);
-    this.setState({ brandList: brandsResponse.data });
+    // this.setState({ brandList: brandsResponse.data });
     const categoriesResponse = await axios.get(`${prodAPI}/categories`);
     console.log("categoriesResponse: ", categoriesResponse);
-    this.setState({ categoryList: categoriesResponse.data });
+    // this.setState({ categoryList: categoriesResponse.data });
+    this.setState({
+      products: getAllProductsResponse.data,
+      brandList: brandsResponse.data,
+      categoryList: categoriesResponse.data,
+    });
   }
 
   checkLoginDetails = (user) => {
@@ -97,10 +105,11 @@ class App extends Component {
         this.setState({
           logedUser: { ...res.data.user, token: res.data.token },
         });
+
         for (let item of Object.entries(res.data.user)) {
-          this.setCookie(item[0], item[1]);
+          this.setCookie(item[0], item[1], user.rememberLogin);
         }
-        this.setCookie("token", res.data.token);
+        this.setCookie("token", res.data.token, user.rememberLogin);
       })
       .catch((err) => console.log("err: ", err));
   };
@@ -116,12 +125,17 @@ class App extends Component {
     for (let item in cloneLogedUser) {
       cloneLogedUser[item] = "";
     }
-    this.setState({ logedUser: cloneLogedUser });
+    this.setState({ logedUser: cloneLogedUser, forceLogin: false });
   };
 
-  setCookie = (key, value) => {
+  setCookie = (key, value, rememberLogin) => {
     let date = new Date();
-    date.setDate(date.getDate() + 7);
+    console.log("setCookie - rememberLogin: ", rememberLogin);
+    if (rememberLogin) {
+      date.setDate(date.getDate() + 7);
+    } else {
+      date.setHours(date.getHours() + 7);
+    }
     document.cookie = `${key}=${value};expires=${date.toGMTString()}`;
   };
 
@@ -210,16 +224,22 @@ class App extends Component {
     clonedProducts[indx] = { ...clonedProducts[indx] };
 
     if (!selectedProduct.isSelected) {
-      const addToCartrResponse = await axios.post(
-        `${prodAPI}/cart`,
-        { productId: selectedProduct._id, quantity: 1 },
-        { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
-      );
+      let addToCartrResponse;
+      if (this.state.logedUser.userRole === "user") {
+        addToCartrResponse = await axios.post(
+          `${prodAPI}/cart`,
+          { productId: selectedProduct._id, quantity: 1 },
+          { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
+        );
+      }
       console.log(
         "App - handleSelectProductToCart - addToCartrResponse: ",
         addToCartrResponse
       );
-      if (addToCartrResponse.status === 201) {
+      if (
+        (addToCartrResponse && addToCartrResponse.status === 201) ||
+        (this.state.logedUser.userRole === "" && 1)
+      ) {
         clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
         clonedProducts[indx].selectedQuantity = 1;
         console.log("AddToCart - clonedProducts: ", clonedProducts);
@@ -457,23 +477,34 @@ class App extends Component {
       "App - recievedPaymentDetails address Id: ",
       recievedPaymentDetails["shippingAddressId"]
     );
-    if (recievedPaymentDetails.onDelivery) {
-      // const orderCheckoutResponse = await axios.post(`${prodAPI}/addOrder`,
-      // {
-      //     "payment_method": "cash on delivery",
-      //     "address_id": recievedPaymentDetails['shippingAddressId']
-      // },
-      // {headers: {Authorization: `Bearer ${this.state.logedUser.token}`}}
-      // )
-      // console.log('App - handleOrderCheckout - orderCheckoutResponse: ', orderCheckoutResponse);
+    if (this.state.logedUser.userRole !== "") {
+      console.log("Entered here after forceLogin");
+      if (recievedPaymentDetails.onDelivery) {
+        const orderCheckoutResponse = await axios.post(
+          `${prodAPI}/addOrder`,
+          {
+            payment_method: "cash on delivery",
+            address_id: recievedPaymentDetails["shippingAddressId"],
+          },
+          { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
+        );
+        console.log(
+          "App - handleOrderCheckout - orderCheckoutResponse: ",
+          orderCheckoutResponse
+        );
+      }
+      const getOrdersResponse = await axios.get(`${prodAPI}/orders`, {
+        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+      });
+      console.log(
+        "App - handleOrderCheckout - getOrdersResponse: ",
+        getOrdersResponse.data
+      );
+    } else {
+      console.log("You should login first");
+      this.setState({ forceLogin: true });
+      // this.handleOrderCheckout(recievedPaymentDetails);
     }
-    const getOrdersResponse = await axios.get(`${prodAPI}/orders`, {
-      headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-    });
-    console.log(
-      "App - handleOrderCheckout - getOrdersResponse: ",
-      getOrdersResponse.data
-    );
   };
 
   render() {
@@ -514,6 +545,7 @@ class App extends Component {
             checkLoginDetails={this.checkLoginDetails}
             logedUser={this.state.logedUser}
             handleLogout={this.handleLogout}
+            forceLogin={this.state.forceLogin}
           />
         )}
         {/* {(this.state.logedUser.userRole === '' || this.state.logedUser.userRole === 'user') &&
