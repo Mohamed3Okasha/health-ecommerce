@@ -32,16 +32,16 @@ class App extends Component {
     super();
     let cloneLogedUser = { ...this.state.logedUser };
     let arrCookies = this.arrangedCookies();
-    console.log("constructor arrCookies: ", arrCookies);
+    // console.log("constructor arrCookies: ", arrCookies);
     for (let cookie in arrCookies) {
       cloneLogedUser[cookie] = arrCookies[cookie];
     }
-    console.log("cloneLogedUser: ", cloneLogedUser);
+    // console.log("cloneLogedUser: ", cloneLogedUser);
     this.state.logedUser = cloneLogedUser;
   }
 
   async componentDidMount() {
-    console.log("App: componentDidMount");
+    // console.log("App: componentDidMount");
     let getAllProductsResponse = await axios.get(`${prodAPI}/products`);
     let showCartResponse;
     let showAddressResponse;
@@ -55,14 +55,10 @@ class App extends Component {
       showAddressResponse = await axios.get(`${prodAPI}/addresses`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
       });
-      console.log(
-        "App - componentDidMount - showCartResponse: ",
-        showCartResponse.data.items
-      );
-      console.log(
-        "App - componentDidMount - showAddressResponse: ",
-        showAddressResponse.data
-      );
+      // console.log(
+      //   "App - componentDidMount - showAddressResponse: ",
+      //   showAddressResponse.data
+      // );
       this.setState({ addressList: showAddressResponse.data });
     }
 
@@ -84,11 +80,9 @@ class App extends Component {
     }
 
     const brandsResponse = await axios.get(`${prodAPI}/brands`);
-    console.log("brandsResponse: ", brandsResponse.data);
-    // this.setState({ brandList: brandsResponse.data });
+    // console.log("brandsResponse: ", brandsResponse.data);
     const categoriesResponse = await axios.get(`${prodAPI}/categories`);
-    console.log("categoriesResponse: ", categoriesResponse);
-    // this.setState({ categoryList: categoriesResponse.data });
+    // console.log("categoriesResponse: ", categoriesResponse);
     this.setState({
       products: getAllProductsResponse.data,
       brandList: brandsResponse.data,
@@ -97,7 +91,7 @@ class App extends Component {
   }
 
   checkLoginDetails = (user) => {
-    console.log(user);
+    // console.log(user);
     axios
       .post(`${prodAPI}/users/login`, user)
       .then((res) => {
@@ -115,7 +109,7 @@ class App extends Component {
   };
 
   handleLogout = () => {
-    console.log("Entered handleLogout");
+    // console.log("Entered handleLogout");
     let arrCookies = this.arrangedCookies();
     for (let cookie in arrCookies) {
       // console.log(cookie, arrCookies[cookie]);
@@ -163,7 +157,7 @@ class App extends Component {
       return p;
     });
     this.setState({ products: clonedProducts });
-    console.log(this.state.products);
+    // console.log(this.state.products);
   };
 
   handleIncrementDecrementQuantity = async (recievedProduct, operator) => {
@@ -182,10 +176,10 @@ class App extends Component {
         },
         { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
       );
-      console.log(
-        "App - handleIncrementDecrementQuantity - addToCartrResponse Increment: ",
-        addToCartrResponse
-      );
+      // console.log(
+      //   "App - handleIncrementDecrementQuantity - addToCartrResponse Increment: ",
+      //   addToCartrResponse
+      // );
     } else if (operator === "-") {
       if (targetProduct.selectedQuantity <= 1) {
         this.handleSelectProductToCart(targetProduct);
@@ -199,10 +193,10 @@ class App extends Component {
           },
           { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
         );
-        console.log(
-          "App - handleIncrementDecrementQuantity - addToCartrResponse Decrement: ",
-          addToCartrResponse
-        );
+        // console.log(
+        //   "App - handleIncrementDecrementQuantity - addToCartrResponse Decrement: ",
+        //   addToCartrResponse
+        // );
       }
     }
     if (addToCartrResponse.status === 201) {
@@ -211,14 +205,14 @@ class App extends Component {
   };
 
   handleSelectProductToCart = async (selectedProduct) => {
-    console.log(
-      "App - handleSelectProductToCart - state products: ",
-      this.state.products
-    );
-    console.log(
-      "App - handleSelectProductToCart - selectedProduct: ",
-      selectedProduct
-    );
+    // console.log(
+    //   "App - handleSelectProductToCart - state products: ",
+    //   this.state.products
+    // );
+    // console.log(
+    //   "App - handleSelectProductToCart - selectedProduct: ",
+    //   selectedProduct
+    // );
     let clonedProducts = [...this.state.products];
     const indx = clonedProducts.indexOf(selectedProduct);
     clonedProducts[indx] = { ...clonedProducts[indx] };
@@ -232,49 +226,49 @@ class App extends Component {
           { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
         );
       }
-      console.log(
-        "App - handleSelectProductToCart - addToCartrResponse: ",
-        addToCartrResponse
-      );
+      // console.log(
+      //   "App - handleSelectProductToCart - addToCartrResponse: ",
+      //   addToCartrResponse
+      // );
       if (
         (addToCartrResponse && addToCartrResponse.status === 201) ||
         (this.state.logedUser.userRole === "" && 1)
       ) {
         clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
         clonedProducts[indx].selectedQuantity = 1;
-        console.log("AddToCart - clonedProducts: ", clonedProducts);
+        // console.log("AddToCart - clonedProducts: ", clonedProducts);
         this.setState({
           products: clonedProducts,
         });
       }
     } else {
-      console.log("productId", selectedProduct._id);
+      // console.log("productId", selectedProduct._id);
       const removeFromCartResponse = await axios.delete(`${prodAPI}/cart`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
         data: { productId: selectedProduct._id },
       });
-      console.log("App - removeFromCartResponse: ", removeFromCartResponse);
+      // console.log("App - removeFromCartResponse: ", removeFromCartResponse);
       if (removeFromCartResponse.status === 200) {
         clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
         clonedProducts[indx].selectedQuantity = 0;
-        console.log("RemoveFromCart - clonedProducts: ", clonedProducts);
+        // console.log("RemoveFromCart - clonedProducts: ", clonedProducts);
         this.setState({ products: clonedProducts });
       }
     }
-    console.log("products: ", this.state.products);
+    // console.log("products: ", this.state.products);
   };
 
   handleAddAddress = async (recievedAddress) => {
-    console.log("App - handleAddAdress - recievedAddress: ", recievedAddress);
+    // console.log("App - handleAddAdress - recievedAddress: ", recievedAddress);
     const addAddressResponse = await axios.post(
       `${prodAPI}/address`,
       recievedAddress,
       { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
     );
-    console.log(
-      "App - handleAddAdress - addAddressResponse: ",
-      addAddressResponse
-    );
+    // console.log(
+    //   "App - handleAddAdress - addAddressResponse: ",
+    //   addAddressResponse
+    // );
     if (addAddressResponse.status === 200 || addAddressResponse === 2001) {
       let cloneAddressList = [...this.state.addressList];
       cloneAddressList.push(recievedAddress);
@@ -283,7 +277,7 @@ class App extends Component {
 
   handleSearchProducts = async (searchWord) => {
     const { data } = await axios.get(`${prodAPI}/products?q=${searchWord}`);
-    console.log("handleSearchProducts - data: ", data);
+    // console.log("handleSearchProducts - data: ", data);
     for (let p in data) {
       data[p].isSelected = false;
       data[p].selectedQuantity = 0;
@@ -292,15 +286,39 @@ class App extends Component {
   };
 
   handleAddEditProduct = async (productData, id, newCategory, newBrand) => {
-    console.log("App - handleAddEditProduct - productData: ", productData);
     if (productData.category === "other") {
-      this.handleAddCategory(newCategory);
+      const addCategoryResponse = await axios.post(
+        `${prodAPI}/addCategory`,
+        newCategory,
+        {
+          headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+        }
+      );
+      if (
+        (addCategoryResponse.status === 200) |
+        (addCategoryResponse.status === 2001)
+      ) {
+        productData.category = addCategoryResponse.data.name;
+      }
     } else if (productData.brand === "other") {
-      this.handleAddBrand(newBrand);
+      const addBrandResponse = await axios.post(
+        `${prodAPI}/addBrand`,
+        newBrand,
+        {
+          headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+        }
+      );
+      if (
+        (addBrandResponse.status === 200) |
+        (addBrandResponse.status === 2001)
+      ) {
+        productData.brand = addBrandResponse.data.name;
+      }
     }
+    // console.log("App - handleAddEditProduct - productData: ", productData);
     // console.log('this.state.logedUser: ', this.state.logedUser)
     if (id !== "new") {
-      console.log("Here in Edit Product");
+      // console.log("Here in Edit Product");
       const responseEditProd = await axios.put(
         `${prodAPI}/products/${productData._id}`,
         {
@@ -311,12 +329,10 @@ class App extends Component {
         },
         { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
       );
-      // .then(res => console.log('res: ', res));
-      //Quest ===> when I update products shall I call the componentDidMount somehow? in order to fetch products with nre edits
-      console.log(
-        "App - handleAddEditProduct - responseEditProd: ",
-        responseEditProd
-      );
+      // console.log(
+      //   "App - handleAddEditProduct - responseEditProd: ",
+      //   responseEditProd
+      // );
       if (responseEditProd.status === 200) {
         let cloneProducts = [...this.state.products];
         let findProd = cloneProducts.find((p) => p._id === productData._id);
@@ -325,15 +341,11 @@ class App extends Component {
       }
       this.handleUploadImage("pic-black-white.jpg");
     } else {
-      console.log("Here in Add  New Product");
+      // console.log("Here in Add  New Product: ", productData);
       const responseAddProd = await axios.post(
         `${prodAPI}/addProduct`,
         productData,
         { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
-      );
-      console.log(
-        "App - handleAddEditProduct - responseAddProd: ",
-        responseAddProd
       );
 
       if (responseAddProd.status === 200) {
@@ -347,11 +359,11 @@ class App extends Component {
   handleUploadImage = async (imgLocalPath) => {
     let imgData = new FormData();
     // imgData.append('1234567:19', imgLocalPath);
-    console.log("App - handleUploadImage - imgLocalPath: ", imgLocalPath);
+    // console.log("App - handleUploadImage - imgLocalPath: ", imgLocalPath);
     imgData.append("file", imgLocalPath);
 
     // console.log('App - handleUploadImage - imgData: ', imgData.keys());
-    console.log("App - handleUploadImage - imgData: ", imgData);
+    // console.log("App - handleUploadImage - imgData: ", imgData);
     const uploadImgResponse = await axios.post(
       `${prodAPI}/images`,
       { imgData },
@@ -362,29 +374,30 @@ class App extends Component {
         },
       }
     );
-    console.log(
-      "App - handleUploadImage - uploadImgResponse: ",
-      uploadImgResponse
-    );
+    // console.log(
+    //   "App - handleUploadImage - uploadImgResponse: ",
+    //   uploadImgResponse
+    // );
   };
 
   handleAddCategory = async (nCategory) => {
     const { data } = await axios.post(`${prodAPI}/addCategory`, nCategory, {
       headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
     });
-    console.log("handleAddCategory - data", data);
+    return data;
   };
 
   handleAddBrand = async (nBrand) => {
-    const { data } = await axios.post(`${prodAPI}/addCategory`, nBrand, {
+    const { data } = await axios.post(`${prodAPI}/addBrand`, nBrand, {
       headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
     });
-    console.log("handleAddBrand - data: ", data);
+    // console.log("handleAddBrand - data: ", data);
     // const nBrandId = 1;
+    return data;
   };
 
   handleDeleteProduct = (id) => {
-    console.log("Entered handleDeleteProduct");
+    //console.log("Entered handleDeleteProduct");
     axios
       .delete(`${prodAPI}/products/${id}`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
@@ -397,7 +410,7 @@ class App extends Component {
   };
 
   handleDeleteCategory = async (categoryId) => {
-    console.log("App - handleDeleteCategory");
+    // console.log("App - handleDeleteCategory");
     const deleteCategoryResponse = await axios.delete(
       `${prodAPI}/categories/${categoryId}`,
       {
@@ -437,7 +450,7 @@ class App extends Component {
   };
 
   handleDeleteBrand = async (brandId) => {
-    console.log("App - handleDeleteBrand");
+    // console.log("App - handleDeleteBrand");
     const deleteBrandResponse = await axios.delete(
       `${prodAPI}/brands/${brandId}`,
       {
@@ -473,12 +486,12 @@ class App extends Component {
   };
 
   handleOrderCheckout = async (recievedPaymentDetails) => {
-    console.log(
-      "App - recievedPaymentDetails address Id: ",
-      recievedPaymentDetails["shippingAddressId"]
-    );
+    // console.log(
+    //   "App - recievedPaymentDetails address Id: ",
+    //   recievedPaymentDetails["shippingAddressId"]
+    // );
     if (this.state.logedUser.userRole !== "") {
-      console.log("Entered here after forceLogin");
+      // console.log("Entered here after forceLogin");
       if (recievedPaymentDetails.onDelivery) {
         const orderCheckoutResponse = await axios.post(
           `${prodAPI}/addOrder`,
@@ -488,29 +501,29 @@ class App extends Component {
           },
           { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
         );
-        console.log(
-          "App - handleOrderCheckout - orderCheckoutResponse: ",
-          orderCheckoutResponse
-        );
+        // console.log(
+        //   "App - handleOrderCheckout - orderCheckoutResponse: ",
+        //   orderCheckoutResponse
+        // );
       }
       const getOrdersResponse = await axios.get(`${prodAPI}/orders`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
       });
-      console.log(
-        "App - handleOrderCheckout - getOrdersResponse: ",
-        getOrdersResponse.data
-      );
+      // console.log(
+      //   "App - handleOrderCheckout - getOrdersResponse: ",
+      //   getOrdersResponse.data
+      // );
     } else {
-      console.log("You should login first");
+      // console.log("You should login first");
       this.setState({ forceLogin: true });
       // this.handleOrderCheckout(recievedPaymentDetails);
     }
   };
 
   render() {
-    console.log("App: render");
+    // console.log("App: render");
 
-    console.log("App: render: logedUser.userRole: ", this.state.logedUser);
+    // console.log("App: render: logedUser.userRole: ", this.state.logedUser);
     return (
       <React.Fragment>
         {this.state.logedUser.userRole === "admin" && (
