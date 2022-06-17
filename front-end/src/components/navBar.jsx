@@ -65,7 +65,7 @@ const NavBar = (props) => {
                 >
                   Sign Up
                 </button>
-                <SignUp />
+                <SignUp checkLoginDetails={props.checkLoginDetails} />
 
                 <button
                   ref={loginButtonRef}
