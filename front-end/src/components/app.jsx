@@ -286,37 +286,7 @@ class App extends Component {
   };
 
   handleAddEditProduct = async (productData, id, newCategory, newBrand) => {
-    if (productData.category === "other") {
-      const addCategoryResponse = await axios.post(
-        `${prodAPI}/addCategory`,
-        newCategory,
-        {
-          headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-        }
-      );
-      if (
-        (addCategoryResponse.status === 200) |
-        (addCategoryResponse.status === 2001)
-      ) {
-        productData.category = addCategoryResponse.data.name;
-      }
-    } else if (productData.brand === "other") {
-      const addBrandResponse = await axios.post(
-        `${prodAPI}/addBrand`,
-        newBrand,
-        {
-          headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-        }
-      );
-      if (
-        (addBrandResponse.status === 200) |
-        (addBrandResponse.status === 2001)
-      ) {
-        productData.brand = addBrandResponse.data.name;
-      }
-    }
-    // console.log("App - handleAddEditProduct - productData: ", productData);
-    // console.log('this.state.logedUser: ', this.state.logedUser)
+    productData.brand = newBrand.name;
     if (id !== "new") {
       // console.log("Here in Edit Product");
       const responseEditProd = await axios.put(
@@ -341,17 +311,90 @@ class App extends Component {
       }
       this.handleUploadImage("pic-black-white.jpg");
     } else {
-      // console.log("Here in Add  New Product: ", productData);
-      const responseAddProd = await axios.post(
-        `${prodAPI}/addProduct`,
-        productData,
-        { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
-      );
+      // let addCategoryResponse, addBrandResponse, addProdResponse;
+      console.log("Here in Add  New Product: ", productData);
 
-      if (responseAddProd.status === 200) {
-        let cloneProducts = [...this.state.products];
-        cloneProducts.push(productData);
-        this.setState({ products: cloneProducts });
+      if (productData.category === "other" && productData.brand === "other") {
+        console.log('productData.category === "other"');
+        axios.all([
+          axios
+            .post(`${prodAPI}/addCategory`, newCategory, {
+              headers: {
+                Authorization: `Bearer ${this.state.logedUser.token}`,
+              },
+            })
+            .then((addCategoryResponse) => {
+              if (
+                addCategoryResponse.status === 200 ||
+                addCategoryResponse.status === 201
+              ) {
+                productData.category = addCategoryResponse.data.name;
+              }
+            }),
+          axios
+            .post(`${prodAPI}/addBrand`, newBrand, {
+              headers: {
+                Authorization: `Bearer ${this.state.logedUser.token}`,
+              },
+            })
+            .then((addBrandResponse) => {
+              if (addBrandResponse.status === 201) {
+                console.log("productData before: ", productData);
+                console.log("addBrandResponse: ", addBrandResponse);
+                productData.brand = addBrandResponse.data.name;
+                console.log("productData after: ", productData);
+              }
+            }),
+          axios
+            .post(`${prodAPI}/addProduct`, productData, {
+              headers: {
+                Authorization: `Bearer ${this.state.logedUser.token}`,
+              },
+            })
+            .then((addProdResponse) => {
+              if (addProdResponse.status === 200) {
+                let cloneProducts = [...this.state.products];
+                cloneProducts.push(productData);
+                this.setState({ products: cloneProducts });
+              }
+            }),
+        ]);
+        // .then(() => {
+
+        // });
+      } else if (
+        productData.category !== "other" &&
+        productData.brand === "other"
+      ) {
+        axios
+          .post(`${prodAPI}/addBrand`, newBrand, {
+            headers: {
+              Authorization: `Bearer ${this.state.logedUser.token}`,
+            },
+          })
+          .then((addBrandResponse) => {
+            if (
+              addBrandResponse.status === 200 ||
+              addBrandResponse.status === 201
+            ) {
+              productData.brand = addBrandResponse.data.name;
+            }
+          })
+          .then(() => {
+            axios
+              .post(`${prodAPI}/addProduct`, productData, {
+                headers: {
+                  Authorization: `Bearer ${this.state.logedUser.token}`,
+                },
+              })
+              .then((addProdResponse) => {
+                if (addProdResponse.status === 200) {
+                  let cloneProducts = [...this.state.products];
+                  cloneProducts.push(productData);
+                  this.setState({ products: cloneProducts });
+                }
+              });
+          });
       }
     }
   };
