@@ -42,52 +42,86 @@ class App extends Component {
 
   async componentDidMount() {
     // console.log("App: componentDidMount");
-    let getAllProductsResponse = await axios.get(`${prodAPI}/products`);
-    let showCartResponse;
-    let showAddressResponse;
-    if (
-      (this.state.logedUser.token !== "") &
-      (this.state.logedUser.userRole === "user")
-    ) {
-      showCartResponse = await axios.get(`${prodAPI}/cart`, {
-        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-      });
-      showAddressResponse = await axios.get(`${prodAPI}/addresses`, {
-        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-      });
-      // console.log(
-      //   "App - componentDidMount - showAddressResponse: ",
-      //   showAddressResponse.data
-      // );
-      this.setState({ addressList: showAddressResponse.data });
-    }
+    let getAllProductsResponse, showCartResponse, showAddressResponse;
+    axios
+      .get(`${prodAPI}/products`)
+      .then((res) => {
+        console.log("res: ", res);
+        getAllProductsResponse = res;
+      })
+      .then(() => {
+        if (
+          this.state.logedUser.token !== "" &&
+          this.state.logedUser.userRole === "user"
+        ) {
+          axios
+            .all([
+              axios.get(`${prodAPI}/cart`, {
+                headers: {
+                  Authorization: `Bearer ${this.state.logedUser.token}`,
+                },
+              }),
 
-    console.log("products from api: ", getAllProductsResponse.data);
-    for (let p of getAllProductsResponse.data) {
-      p.isSelected = false;
-      if (showCartResponse) {
-        p.selectedQuantity = 0;
-      }
-    }
-    if (showCartResponse) {
-      showCartResponse.data.items.forEach((item) => {
-        let targetProduct = getAllProductsResponse.data.find(
-          (p) => p._id === item.product_id
-        );
-        targetProduct.isSelected = true;
-        targetProduct.selectedQuantity = item.quantity;
+              axios.get(`${prodAPI}/addresses`, {
+                headers: {
+                  Authorization: `Bearer ${this.state.logedUser.token}`,
+                },
+              }),
+            ])
+            .then(
+              axios.spread((cartRes, addressRes) => {
+                showCartResponse = cartRes;
+                showAddressResponse = addressRes;
+              })
+            )
+            .then(() => {
+              console.log("products from api: ", getAllProductsResponse.data);
+              for (let p of getAllProductsResponse.data) {
+                p.isSelected = false;
+                if (showCartResponse) {
+                  p.selectedQuantity = 0;
+                }
+              }
+              if (showCartResponse) {
+                console.log("getAllProductsResponse: ", getAllProductsResponse);
+                console.log("showCartResponse: ", showCartResponse);
+                showCartResponse.data.items.forEach((item) => {
+                  let targetProduct = getAllProductsResponse.data.find(
+                    (p) => p._id === item.product_id
+                  );
+                  if (targetProduct) {
+                    targetProduct.isSelected = true;
+                    targetProduct.selectedQuantity = item.quantity;
+                    console.log("targetProduct: ", targetProduct);
+                  }
+                });
+              }
+            })
+            .then(() => {
+              this.setState({
+                products: getAllProductsResponse.data,
+                addressList: showAddressResponse.data,
+              });
+            });
+        } else {
+          this.setState({ products: getAllProductsResponse.data });
+        }
+      })
+      .then(() => {
+        axios
+          .all([
+            axios.get(`${prodAPI}/brands`),
+            axios.get(`${prodAPI}/categories`),
+          ])
+          .then(
+            axios.spread((brandsRes, categoryRes) => {
+              this.setState({
+                brandList: brandsRes.data,
+                categoryList: categoryRes.data,
+              });
+            })
+          );
       });
-    }
-
-    const brandsResponse = await axios.get(`${prodAPI}/brands`);
-    // console.log("brandsResponse: ", brandsResponse.data);
-    const categoriesResponse = await axios.get(`${prodAPI}/categories`);
-    // console.log("categoriesResponse: ", categoriesResponse);
-    this.setState({
-      products: getAllProductsResponse.data,
-      brandList: brandsResponse.data,
-      categoryList: categoriesResponse.data,
-    });
   }
 
   checkLoginDetails = (user) => {
