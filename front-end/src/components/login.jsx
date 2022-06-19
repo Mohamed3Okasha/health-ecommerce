@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
-// import axios from 'axios';
-// let prodAPI = 'https://healthecommerce.herokuapp.com';
+import axios from "axios";
+let prodAPI = "https://healthecommerce.herokuapp.com";
 
 const Login = (props) => {
   const [user, setUser] = useState({
@@ -17,17 +17,18 @@ const Login = (props) => {
     e.preventDefault();
     const error = validateLogin();
     if (!error) {
-      console.log("Login pressed");
-      //   if (props.checkLoginDetails(user)) {
-      //     // console.log('login returned true');
-      //   }
-      props.checkLoginDetails(user);
-      closeLoginBtnRef.current.click(); //put here for noew in order to avoid the delay of waiting the new logedUser props as it makes a bug in closing the login modal
-      if (props.logedUser.userRole) {
-        console.log("login returned true");
-      }
-    } else {
-      return;
+      axios
+        .post(`${prodAPI}/users/login`, user)
+        .then((res) => {
+          // setLogedUser({ ...logedUser, ...res.data.user, token: res.data.token });
+          props.setLogedUser({
+            ...res.data.user,
+            token: res.data.token,
+            rememberLogin: user.rememberLogin,
+          });
+          closeLoginBtnRef.current.click();
+        })
+        .catch((err) => setErrors({ email: err.response.data }));
     }
   };
 
@@ -51,11 +52,11 @@ const Login = (props) => {
     let userData = { ...user };
     if (e.target.name === "rememberLogin") {
       userData.rememberLogin = !userData.rememberLogin;
-      console.log(
-        "handleChange pressed - rememberLogin",
-        userData.rememberLogin,
-        user
-      );
+      // console.log(
+      //   "handleChange pressed - rememberLogin",
+      //   userData.rememberLogin,
+      //   user
+      // );
     } else {
       userData[e.target.name] = e.target.value;
     }
@@ -85,7 +86,7 @@ const Login = (props) => {
                 aria-label="Close"
               ></button>
             </div>
-            <form onSubmit={handleSubmitLogin} className="mx-auto col-9">
+            <form onSubmit={handleSubmitLogin} className="mx-auto">
               <div className="container">
                 <div className="modal-body">
                   <div></div>
