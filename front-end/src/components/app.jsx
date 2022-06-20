@@ -676,6 +676,7 @@ class App extends Component {
                   handleAddEditProduct={this.handleAddEditProduct}
                   brandList={this.state.brandList}
                   categoryList={this.state.categoryList}
+                  logedUser={this.state.logedUser}
                 />
               }
             />

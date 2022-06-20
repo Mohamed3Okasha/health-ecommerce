@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 // import axios from 'axios'
 import { useParams } from "react-router-dom";
+import NotFound from "./notFound";
 
 const ProductForm = (props) => {
   const { id } = useParams();
@@ -28,11 +29,11 @@ const ProductForm = (props) => {
   });
 
   let categoryStyle =
-    productData.category === "other"
+    productData?.category === "other"
       ? { display: "block" }
       : { display: "none" };
   let brandStyle =
-    productData.brand === "other" ? { display: "block" } : { display: "none" };
+    productData?.brand === "other" ? { display: "block" } : { display: "none" };
 
   // let[categoryList, setCategoryList] = useState(['Devices', 'Cosmotics', 'Vitamins'])
   // let[brandList, setBrandList] = useState(['Company 1', 'Company 2', 'Company 3'])
@@ -40,7 +41,6 @@ const ProductForm = (props) => {
   useEffect(() => {
     if (id !== "new") {
       let findProduct = props.products.find((p) => p._id === id);
-      //    console.log('findProduct: ',findProduct)
       setProductData(findProduct);
     }
   }, []);
@@ -69,6 +69,9 @@ const ProductForm = (props) => {
     props.handleAddEditProduct(productData, id, newCategory, newBrand);
   };
 
+  if (props.logedUser.userRole !== "admin") {
+    return <NotFound />;
+  }
   return (
     <React.Fragment>
       {/* productData.name !== '' */}
@@ -86,7 +89,7 @@ const ProductForm = (props) => {
                 Category
               </label>
               <select
-                value={productData.category.name}
+                value={productData.category?.name}
                 onChange={handleChange}
                 name="category"
                 id="inputCategory"
@@ -137,7 +140,7 @@ const ProductForm = (props) => {
                 Brand
               </label>
               <select
-                value={productData.brand.name}
+                value={productData.brand?.name}
                 onChange={handleChange}
                 name="brand"
                 id="inputBrand"
