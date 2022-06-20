@@ -12,7 +12,7 @@ const User = (props) => {
       const getUersResponse = await axios.get(`${prodAPI}/allUsers`, {
         headers: { Authorization: `Bearer ${props.logedUser.token}` },
       });
-      console.log("User - getUersResponse: ", getUersResponse);
+      // console.log("User - getUersResponse: ", getUersResponse);
       setAllUsers(getUersResponse.data);
     };
 
@@ -20,7 +20,7 @@ const User = (props) => {
   }, []);
 
   const handleChangeUserStatus = async (e, userId) => {
-    console.log("handleChangeUserStatus - userId: ", e.target.value, userId);
+    // console.log("handleChangeUserStatus - userId: ", e.target.value, userId);
     // setSelectedStatus(e.target.value);
     let targetStatus = e.target.value;
     const changeSatusResponse = await axios.put(
@@ -31,7 +31,7 @@ const User = (props) => {
       }
     );
 
-    console.log("adminDashboard - changeSatusResponse: ", changeSatusResponse);
+    // console.log("adminDashboard - changeSatusResponse: ", changeSatusResponse);
     if (changeSatusResponse.status === 200) {
       let cloneAllUsers = [...allUsers];
       cloneAllUsers.find((u) => u._id === userId).status = targetStatus;
@@ -53,7 +53,7 @@ const User = (props) => {
         <tbody>
           {allUsers.map((u) => {
             return (
-              <tr>
+              <tr key={u._id}>
                 <td>{u.name}</td>
                 <td>{u.email}</td>
                 <td>{u.status}</td>

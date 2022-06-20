@@ -478,18 +478,18 @@ class App extends Component {
 
   handleDeleteCategory = async (categoryId) => {
     // console.log("App - handleDeleteCategory");
-    const deleteCategoryResponse = await axios.delete(
-      `${prodAPI}/categories/${categoryId}`,
-      {
+    axios
+      .delete(`${prodAPI}/categories/${categoryId}`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-      }
-    );
-    if (deleteCategoryResponse.status === 200) {
-      let cloneCategoryList = [...this.state.categoryList];
-      this.setState({
-        categoryList: cloneCategoryList.filter((c) => c._id !== categoryId),
+      })
+      .then((deleteCategoryResponse) => {
+        if (deleteCategoryResponse.status === 200) {
+          let cloneCategoryList = [...this.state.categoryList];
+          this.setState({
+            categoryList: cloneCategoryList.filter((c) => c._id !== categoryId),
+          });
+        }
       });
-    }
   };
 
   handleEditCategory = async (categoryData) => {
@@ -518,18 +518,18 @@ class App extends Component {
 
   handleDeleteBrand = async (brandId) => {
     // console.log("App - handleDeleteBrand");
-    const deleteBrandResponse = await axios.delete(
-      `${prodAPI}/brands/${brandId}`,
-      {
+    axios
+      .delete(`${prodAPI}/brands/${brandId}`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-      }
-    );
-    if (deleteBrandResponse.status === 200) {
-      let cloneBrandList = [...this.state.brandList];
-      this.setState({
-        brandList: cloneBrandList.filter((b) => b._id !== brandId),
+      })
+      .then((deleteBrandResponse) => {
+        if (deleteBrandResponse.status === 200) {
+          let cloneBrandList = [...this.state.brandList];
+          this.setState({
+            brandList: cloneBrandList.filter((b) => b._id !== brandId),
+          });
+        }
       });
-    }
   };
 
   handleEditBrand = async (brandData) => {

@@ -17,6 +17,7 @@ const CategoryTable = (props) => {
           {props.categoryList.map((c) => {
             return (
               <CategoryItem
+                key={c._id}
                 category={c}
                 handleDeleteCategory={props.handleDeleteCategory}
                 handleEditCategory={props.handleEditCategory}

@@ -1,10 +1,16 @@
 import React from "react";
 import BrandTable from "./brandTable";
 import CategoryTable from "./categoryTable";
+import NotFound from "./notFound";
 import User from "./user";
 
 const AdminDashBoard = (props) => {
-  console.log("AdminDashBoard - props: ", props);
+  // console.log("AdminDashBoard - props: ", props);
+
+  if (props.logedUser.userRole !== "admin") {
+    return <NotFound />;
+  }
+
   return (
     <React.Fragment>
       <div className="container">
