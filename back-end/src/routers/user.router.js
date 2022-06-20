@@ -13,6 +13,7 @@ router.post("/users/logoutAll", auth, userController.logoutAll);
 router.get("/users/me", auth, userController.me);
 
 router.post("/cart", auth, cartController.addToCart);
+router.put("/updateCart", auth, cartController.updateCart);
 router.get("/cart", auth, cartController.showCart);
 router.delete("/cart", auth, cartController.removeFromCart);
 
