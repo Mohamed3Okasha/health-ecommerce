@@ -17,6 +17,7 @@ const BrandTable = (props) => {
           {props.brandList.map((b) => {
             return (
               <BrandItem
+                key={b._id}
                 brand={b}
                 handleDeleteBrand={props.handleDeleteBrand}
                 handleEditBrand={props.handleEditBrand}

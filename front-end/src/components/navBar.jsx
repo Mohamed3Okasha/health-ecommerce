@@ -5,7 +5,6 @@ import Login from "./login";
 import SignUp from "./signUp";
 
 const NavBar = (props) => {
-  console.log("NavBar - props", props);
   const loginButtonRef = useRef(null);
   if (props.forceLogin) {
     loginButtonRef.current.click();
@@ -80,6 +79,7 @@ const NavBar = (props) => {
                 <Login
                   checkLoginDetails={props.checkLoginDetails}
                   logedUser={props.logedUser}
+                  setLogedUser={props.setLogedUser}
                 />
               </div>
             )}

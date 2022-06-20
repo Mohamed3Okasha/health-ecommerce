@@ -28,6 +28,14 @@ class App extends Component {
     forceLogin: false,
   };
 
+  setLogedUser = (user) => {
+    console.log("setLogedUser - user: ", user);
+    this.setState({ logedUser: user });
+    for (let item of Object.entries(user)) {
+      this.setCookie(item[0], item[1], user.rememberLogin);
+    }
+  };
+
   constructor() {
     super();
     let cloneLogedUser = { ...this.state.logedUser };
@@ -123,24 +131,6 @@ class App extends Component {
           );
       });
   }
-
-  checkLoginDetails = (user) => {
-    // console.log(user);
-    axios
-      .post(`${prodAPI}/users/login`, user)
-      .then((res) => {
-        // console.log(res);
-        this.setState({
-          logedUser: { ...res.data.user, token: res.data.token },
-        });
-
-        for (let item of Object.entries(res.data.user)) {
-          this.setCookie(item[0], item[1], user.rememberLogin);
-        }
-        this.setCookie("token", res.data.token, user.rememberLogin);
-      })
-      .catch((err) => console.log("err: ", err));
-  };
 
   handleLogout = () => {
     // console.log("Entered handleLogout");
@@ -488,18 +478,18 @@ class App extends Component {
 
   handleDeleteCategory = async (categoryId) => {
     // console.log("App - handleDeleteCategory");
-    const deleteCategoryResponse = await axios.delete(
-      `${prodAPI}/categories/${categoryId}`,
-      {
+    axios
+      .delete(`${prodAPI}/categories/${categoryId}`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-      }
-    );
-    if (deleteCategoryResponse.status === 200) {
-      let cloneCategoryList = [...this.state.categoryList];
-      this.setState({
-        categoryList: cloneCategoryList.filter((c) => c._id !== categoryId),
+      })
+      .then((deleteCategoryResponse) => {
+        if (deleteCategoryResponse.status === 200) {
+          let cloneCategoryList = [...this.state.categoryList];
+          this.setState({
+            categoryList: cloneCategoryList.filter((c) => c._id !== categoryId),
+          });
+        }
       });
-    }
   };
 
   handleEditCategory = async (categoryData) => {
@@ -528,18 +518,18 @@ class App extends Component {
 
   handleDeleteBrand = async (brandId) => {
     // console.log("App - handleDeleteBrand");
-    const deleteBrandResponse = await axios.delete(
-      `${prodAPI}/brands/${brandId}`,
-      {
+    axios
+      .delete(`${prodAPI}/brands/${brandId}`, {
         headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-      }
-    );
-    if (deleteBrandResponse.status === 200) {
-      let cloneBrandList = [...this.state.brandList];
-      this.setState({
-        brandList: cloneBrandList.filter((b) => b._id !== brandId),
+      })
+      .then((deleteBrandResponse) => {
+        if (deleteBrandResponse.status === 200) {
+          let cloneBrandList = [...this.state.brandList];
+          this.setState({
+            brandList: cloneBrandList.filter((b) => b._id !== brandId),
+          });
+        }
       });
-    }
   };
 
   handleEditBrand = async (brandData) => {
@@ -636,6 +626,7 @@ class App extends Component {
             logedUser={this.state.logedUser}
             handleLogout={this.handleLogout}
             forceLogin={this.state.forceLogin}
+            setLogedUser={this.setLogedUser}
           />
         )}
         {/* {(this.state.logedUser.userRole === '' || this.state.logedUser.userRole === 'user') &&
