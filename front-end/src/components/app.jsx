@@ -29,7 +29,7 @@ class App extends Component {
   };
 
   setLogedUser = (user) => {
-    console.log("setLogedUser - user: ", user);
+    // console.log("setLogedUser - user: ", user);
     this.setState({ logedUser: user });
     for (let item of Object.entries(user)) {
       this.setCookie(item[0], item[1], user.rememberLogin);
@@ -54,7 +54,7 @@ class App extends Component {
     axios
       .get(`${prodAPI}/products`)
       .then((res) => {
-        console.log("res: ", res);
+        // console.log("res: ", res);
         getAllProductsResponse = res;
       })
       .then(() => {
@@ -83,7 +83,7 @@ class App extends Component {
               })
             )
             .then(() => {
-              console.log("products from api: ", getAllProductsResponse.data);
+              // console.log("products from api: ", getAllProductsResponse.data);
               for (let p of getAllProductsResponse.data) {
                 p.isSelected = false;
                 if (showCartResponse) {
@@ -91,8 +91,8 @@ class App extends Component {
                 }
               }
               if (showCartResponse) {
-                console.log("getAllProductsResponse: ", getAllProductsResponse);
-                console.log("showCartResponse: ", showCartResponse);
+                // console.log("getAllProductsResponse: ", getAllProductsResponse);
+                // console.log("showCartResponse: ", showCartResponse);
                 showCartResponse.data.items.forEach((item) => {
                   let targetProduct = getAllProductsResponse.data.find(
                     (p) => p._id === item.product_id
@@ -100,7 +100,7 @@ class App extends Component {
                   if (targetProduct) {
                     targetProduct.isSelected = true;
                     targetProduct.selectedQuantity = item.quantity;
-                    console.log("targetProduct: ", targetProduct);
+                    // console.log("targetProduct: ", targetProduct);
                   }
                 });
               }
@@ -132,6 +132,61 @@ class App extends Component {
       });
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    let allStateProducts = this.state.products;
+    if (
+      this.state.logedUser !== prevState.logedUser &&
+      this.state.logedUser.userRole !== ""
+    ) {
+      // console.log("Entered componentDidUpdate");
+      let tempCartProducts = [];
+      allStateProducts
+        .filter((p) => p.isSelected === true)
+        .forEach((targetProduct) => {
+          tempCartProducts.push({
+            productId: targetProduct._id,
+            quantity: targetProduct.selectedQuantity,
+          });
+        });
+      // console.log("App - tempCartProducts: ", tempCartProducts);
+      axios
+        .put(
+          `${prodAPI}/updateCart`,
+          { products: tempCartProducts },
+          {
+            headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+          }
+        )
+        .then((tempCartProductsRes) => {
+          // console.log(
+          //   "tempCartProductsRes: ",
+          //   tempCartProductsRes.status
+          // );
+          if (tempCartProductsRes.status === 201) {
+            axios.get(`${prodAPI}/cart`, {
+              headers: {
+                Authorization: `Bearer ${this.state.logedUser.token}`,
+              },
+            });
+            tempCartProductsRes.data.items.forEach((item) => {
+              let targetProduct = allStateProducts.find(
+                (p) => p._id === item.product_id
+              );
+              if (targetProduct) {
+                targetProduct.isSelected = true;
+                targetProduct.selectedQuantity = item.quantity;
+                // console.log("targetProduct: ", targetProduct);
+              }
+            });
+          }
+        })
+        .then(() => {
+          // console.log("App - allStateProducts: ", allStateProducts);
+          this.setState({ products: allStateProducts });
+        });
+    }
+  }
+
   handleLogout = () => {
     // console.log("Entered handleLogout");
     let arrCookies = this.arrangedCookies();
@@ -148,7 +203,7 @@ class App extends Component {
 
   setCookie = (key, value, rememberLogin) => {
     let date = new Date();
-    console.log("setCookie - rememberLogin: ", rememberLogin);
+    // console.log("setCookie - rememberLogin: ", rememberLogin);
     if (rememberLogin) {
       date.setDate(date.getDate() + 7);
     } else {
@@ -192,14 +247,18 @@ class App extends Component {
     let addToCartrResponse;
     if (operator === "+") {
       targetProduct.selectedQuantity++;
-      addToCartrResponse = await axios.post(
-        `${prodAPI}/cart`,
-        {
-          productId: targetProduct._id,
-          quantity: targetProduct.selectedQuantity,
-        },
-        { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
-      );
+      if (this.state.logedUser.userRole !== "") {
+        addToCartrResponse = await axios.post(
+          `${prodAPI}/cart`,
+          {
+            productId: targetProduct._id,
+            quantity: targetProduct.selectedQuantity,
+          },
+          { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
+        );
+      } else {
+        this.setState({ products: clonedProducts });
+      }
       // console.log(
       //   "App - handleIncrementDecrementQuantity - addToCartrResponse Increment: ",
       //   addToCartrResponse
@@ -209,21 +268,29 @@ class App extends Component {
         this.handleSelectProductToCart(targetProduct);
       } else {
         targetProduct.selectedQuantity--;
-        addToCartrResponse = await axios.post(
-          `${prodAPI}/cart`,
-          {
-            productId: targetProduct._id,
-            quantity: targetProduct.selectedQuantity,
-          },
-          { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
-        );
+        if (this.state.logedUser.userRole !== "") {
+          addToCartrResponse = await axios.post(
+            `${prodAPI}/cart`,
+            {
+              productId: targetProduct._id,
+              quantity: targetProduct.selectedQuantity,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${this.state.logedUser.token}`,
+              },
+            }
+          );
+        } else {
+          this.setState({ products: clonedProducts });
+        }
         // console.log(
         //   "App - handleIncrementDecrementQuantity - addToCartrResponse Decrement: ",
         //   addToCartrResponse
         // );
       }
     }
-    if (addToCartrResponse.status === 201) {
+    if (addToCartrResponse?.status === 201) {
       this.setState({ products: clonedProducts });
     }
   };
@@ -256,7 +323,7 @@ class App extends Component {
       // );
       if (
         (addToCartrResponse && addToCartrResponse.status === 201) ||
-        (this.state.logedUser.userRole === "" && 1)
+        this.state.logedUser.userRole === ""
       ) {
         clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
         clonedProducts[indx].selectedQuantity = 1;
@@ -267,12 +334,18 @@ class App extends Component {
       }
     } else {
       // console.log("productId", selectedProduct._id);
-      const removeFromCartResponse = await axios.delete(`${prodAPI}/cart`, {
-        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-        data: { productId: selectedProduct._id },
-      });
+      let removeFromCartResponse;
+      if (this.state.logedUser.userRole === "user") {
+        removeFromCartResponse = await axios.delete(`${prodAPI}/cart`, {
+          headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
+          data: { productId: selectedProduct._id },
+        });
+      }
       // console.log("App - removeFromCartResponse: ", removeFromCartResponse);
-      if (removeFromCartResponse.status === 200) {
+      if (
+        removeFromCartResponse?.status === 200 ||
+        this.state.logedUser.userRole === ""
+      ) {
         clonedProducts[indx].isSelected = !clonedProducts[indx].isSelected;
         clonedProducts[indx].selectedQuantity = 0;
         // console.log("RemoveFromCart - clonedProducts: ", clonedProducts);
@@ -363,10 +436,10 @@ class App extends Component {
             })
             .then((addBrandResponse) => {
               if (addBrandResponse.status === 201) {
-                console.log("productData before: ", productData);
-                console.log("addBrandResponse: ", addBrandResponse);
+                // console.log("productData before: ", productData);
+                // console.log("addBrandResponse: ", addBrandResponse);
                 productData.brand = addBrandResponse.data.name;
-                console.log("productData after: ", productData);
+                // console.log("productData after: ", productData);
               }
             }),
           axios
@@ -560,22 +633,41 @@ class App extends Component {
     if (this.state.logedUser.userRole !== "") {
       // console.log("Entered here after forceLogin");
       if (recievedPaymentDetails.onDelivery) {
-        const orderCheckoutResponse = await axios.post(
-          `${prodAPI}/addOrder`,
-          {
-            payment_method: "cash on delivery",
-            address_id: recievedPaymentDetails["shippingAddressId"],
-          },
-          { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
-        );
+        axios
+          .post(
+            `${prodAPI}/addOrder`,
+            {
+              payment_method: "cash on delivery",
+              address_id: recievedPaymentDetails["shippingAddressId"],
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${this.state.logedUser.token}`,
+              },
+            }
+          )
+          .then((addOrderRes) => {
+            // console.log("App - addOrderRes: ", addOrderRes);
+            if (addOrderRes.status === 200 || addOrderRes.status === 201) {
+              let cloneProducts = [...this.state.products];
+              // console.log("confirm order at clone: ", cloneProducts);
+
+              cloneProducts.forEach((p) => {
+                if (p.isSelected) {
+                  p.isSelected = false;
+                }
+              });
+              this.setState({ products: cloneProducts });
+              // console.log("confirm order: ", cloneProducts);
+              //loop over products and
+            }
+          });
         // console.log(
         //   "App - handleOrderCheckout - orderCheckoutResponse: ",
         //   orderCheckoutResponse
         // );
       }
-      const getOrdersResponse = await axios.get(`${prodAPI}/orders`, {
-        headers: { Authorization: `Bearer ${this.state.logedUser.token}` },
-      });
+
       // console.log(
       //   "App - handleOrderCheckout - getOrdersResponse: ",
       //   getOrdersResponse.data
@@ -589,7 +681,6 @@ class App extends Component {
 
   render() {
     // console.log("App: render");
-
     // console.log("App: render: logedUser.userRole: ", this.state.logedUser);
     return (
       <React.Fragment>

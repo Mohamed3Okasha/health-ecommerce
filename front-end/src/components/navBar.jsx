@@ -10,7 +10,7 @@ const NavBar = (props) => {
     loginButtonRef.current.click();
   }
   return (
-    <nav className="navbar navbar-expand-md navbar-dark bg-dark text-muted">
+    <nav className="navbar navbar-expand-md navbar-dark bg-dark text-muted px-5 pt-3 pb-2">
       <div className="container-fluid">
         <Link className="navbar-brand" to="/">
           Logo
@@ -31,11 +31,18 @@ const NavBar = (props) => {
               Contact
             </Link>
             <Link to="/cart">
-              <span className="badge bg-primary p-1">
-                {" "}
-                <i className="bi bi-cart-check lg fs-4"></i>{" "}
-                {props.productCount}{" "}
-              </span>
+              <button
+                type="button"
+                className="btn btn-primary position-relative p-1"
+              >
+                {"Cart"}
+                <i className="bi bi-cart4 lg fs-4"></i>{" "}
+                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                  {props.productCount}{" "}
+                  <span className="visually-hidden">Products</span>
+                </span>
+                {/* <span className="border circle"></span> */}
+              </button>
             </Link>
           </div>
 
