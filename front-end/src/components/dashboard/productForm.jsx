@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 // import axios from 'axios'
 import { useParams } from "react-router-dom";
-import NotFound from "./notFound";
+import NotFound from "../notFound";
 
 const ProductForm = (props) => {
   const { id } = useParams();

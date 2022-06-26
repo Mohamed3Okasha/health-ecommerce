@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import axios from "axios";
-
 import NavBar from "./navBar";
 import Contact from "./contact";
 import Home from "./home";
@@ -9,10 +8,13 @@ import ShoppingCart from "./shoppingCart";
 import ProductDetails from "./productDetails";
 import NotFound from "./notFound";
 import SignUp from "./signUp";
-import ProductForm from "./productForm";
 import NavBarAdmin from "./navBarAdmin";
-import AdminDashBoard from "./adminDashboard";
 import FormData from "form-data";
+import AdminDashboard from "./dashboard/adminDashboard";
+import Statistics from "./dashboard/statistics";
+import StoreOperations from "./dashboard/storeOperations";
+import ManageProducts from "./dashboard/manageProducts";
+import ProductForm from "./dashboard/productForm";
 const prodAPI = "https://healthecommerce.herokuapp.com";
 
 class App extends Component {
@@ -785,23 +787,38 @@ class App extends Component {
                 />
               }
             />
-            {/* <Route path='/admin' element={<Admin 
-                    products = {this.state.products}
-                    />}/> */}
             <Route
               path="/dashboard"
-              element={
-                <AdminDashBoard
-                  categoryList={this.state.categoryList}
-                  brandList={this.state.brandList}
-                  handleDeleteCategory={this.handleDeleteCategory}
-                  handleEditCategory={this.handleEditCategory}
-                  handleDeleteBrand={this.handleDeleteBrand}
-                  handleEditBrand={this.handleEditBrand}
-                  logedUser={this.state.logedUser}
-                />
-              }
-            />
+              element={<AdminDashboard logedUser={this.state.logedUser} />}
+            >
+              <Route path="/dashboard/statistics" element={<Statistics />} />
+              <Route
+                path="/dashboard/storeoperations"
+                element={
+                  <StoreOperations
+                    categoryList={this.state.categoryList}
+                    brandList={this.state.brandList}
+                    handleDeleteCategory={this.handleDeleteCategory}
+                    handleEditCategory={this.handleEditCategory}
+                    handleDeleteBrand={this.handleDeleteBrand}
+                    handleEditBrand={this.handleEditBrand}
+                    logedUser={this.state.logedUser}
+                  />
+                }
+              />
+              <Route
+                path="/dashboard/manageproducts"
+                element={
+                  <ManageProducts
+                    userRole={this.state.logedUser.userRole}
+                    products={this.state.products}
+                    handleSelectProductToCart={this.handleSelectProductToCart}
+                    handleDeleteProduct={this.handleDeleteProduct}
+                    handleSearchProducts={this.handleSearchProducts}
+                  />
+                }
+              />
+            </Route>
             {/* <Route path="/statistics" element={<Statistics />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
