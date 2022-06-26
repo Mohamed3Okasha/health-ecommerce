@@ -198,7 +198,21 @@ class App extends Component {
     for (let item in cloneLogedUser) {
       cloneLogedUser[item] = "";
     }
-    this.setState({ logedUser: cloneLogedUser, forceLogin: false });
+    if (this.state.logedUser.userRole === "user") {
+      let cloneProducts = [...this.state.products];
+      cloneProducts.filter((p) => (p.isSelected = true));
+      cloneProducts.forEach((p) => {
+        p.selectedProduct = 0;
+        p.isSelected = false;
+      });
+      this.setState({
+        logedUser: cloneLogedUser,
+        forceLogin: false,
+        products: cloneProducts,
+      });
+    } else {
+      this.setState({ logedUser: cloneLogedUser, forceLogin: false });
+    }
   };
 
   setCookie = (key, value, rememberLogin) => {
