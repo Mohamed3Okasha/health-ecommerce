@@ -10,6 +10,7 @@ import NotFound from "./notFound";
 import SignUp from "./signUp";
 import NavBarAdmin from "./navBarAdmin";
 import FormData from "form-data";
+import Footer from "./footer";
 import AdminDashboard from "./dashboard/adminDashboard";
 import Statistics from "./dashboard/statistics";
 import StoreOperations from "./dashboard/storeOperations";
@@ -373,18 +374,22 @@ class App extends Component {
 
   handleAddAddress = async (recievedAddress) => {
     // console.log("App - handleAddAdress - recievedAddress: ", recievedAddress);
-    const addAddressResponse = await axios.post(
-      `${prodAPI}/address`,
-      recievedAddress,
-      { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
-    );
-    // console.log(
-    //   "App - handleAddAdress - addAddressResponse: ",
-    //   addAddressResponse
-    // );
-    if (addAddressResponse.status === 200 || addAddressResponse === 2001) {
-      let cloneAddressList = [...this.state.addressList];
-      cloneAddressList.push(recievedAddress);
+    if (this.state.logedUser.userRole !== "") {
+      const addAddressResponse = await axios.post(
+        `${prodAPI}/address`,
+        recievedAddress,
+        { headers: { Authorization: `Bearer ${this.state.logedUser.token}` } }
+      );
+      // console.log(
+      //   "App - handleAddAdress - addAddressResponse: ",
+      //   addAddressResponse
+      // );
+      if (addAddressResponse.status === 200 || addAddressResponse === 2001) {
+        let cloneAddressList = [...this.state.addressList];
+        cloneAddressList.push(recievedAddress);
+      }
+    } else {
+      this.setState({ forceLogin: true });
     }
   };
 
@@ -425,10 +430,10 @@ class App extends Component {
       this.handleUploadImage("pic-black-white.jpg");
     } else {
       // let addCategoryResponse, addBrandResponse, addProdResponse;
-      console.log("Here in Add  New Product: ", productData);
+      // console.log("Here in Add  New Product: ", productData);
 
       if (productData.category === "other" && productData.brand === "other") {
-        console.log('productData.category === "other"');
+        // console.log('productData.category === "other"');
         axios.all([
           axios
             .post(`${prodAPI}/addCategory`, newCategory, {
@@ -738,7 +743,7 @@ class App extends Component {
         )}
         {/* {(this.state.logedUser.userRole === '' || this.state.logedUser.userRole === 'user') &&
             } */}
-        <main className="container">
+        <main className="container-fluid p-0 min-height-100">
           <Routes>
             <Route path="/contact" element={<Contact />} />
             <Route
@@ -770,6 +775,7 @@ class App extends Component {
                 />
               }
             />
+            <Route path="/myorders" element={<MyOrders />} />
             <Route
               path="/products/:id"
               element={<ProductDetails products={this.state.products} />}
@@ -823,6 +829,7 @@ class App extends Component {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+        <Footer />
       </React.Fragment>
     );
   }
