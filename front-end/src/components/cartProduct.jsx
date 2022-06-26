@@ -26,12 +26,12 @@ class CartProduct extends Component {
 
     return (
       <React.Fragment>
-        <div className="card shadow mb-3 ">
+        <div className="card shadow mb-3 font-monospace">
           <div className="card-body d-flex justify-content-between p-1 p-sm-3">
             <div className="d-flex">
               <div className="d-none d-sm-inline">
                 <img
-                  src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-shopping-carts/img1.webp"
+                  src={this.props.product.images[0]["image"]}
                   className="img-fluid rounded-3"
                   alt="Shopping item"
                   style={{ width: "65px" }}
@@ -84,7 +84,10 @@ class CartProduct extends Component {
               </span>
             </div>
             <div className="d-flex align-items-center">
-              <p className="p-0 mt-4">{this.props.product.price} EGP</p>
+              <p className="p-0 mt-4">
+                {this.props.product.price * this.props.product.selectedQuantity}{" "}
+                EGP
+              </p>
             </div>
             <div className="d-flex align-items-center">
               <i

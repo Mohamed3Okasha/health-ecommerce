@@ -55,7 +55,11 @@ class ShoppingCart extends Component {
                   <Payment
                     subTotal={this.props.products
                       .filter((p) => p.isSelected === true)
-                      .reduce((total, product) => total + product.price, 0)}
+                      .reduce(
+                        (total, product) =>
+                          total + product.price * product.selectedQuantity,
+                        0
+                      )}
                     handleAddAddress={this.props.handleAddAddress}
                     addressList={this.props.addressList}
                     handleOrderCheckout={this.props.handleOrderCheckout}
