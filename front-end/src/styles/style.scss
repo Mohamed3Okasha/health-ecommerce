@@ -1,11 +1,25 @@
-@import '../../node_modules/bootstrap/scss/bootstrap.scss';
+@import "../../node_modules/bootstrap/scss/bootstrap.scss";
 
-.form-check-input[type="radio"]:checked{
-    background-color:gray;
-    border-color: none;
+.form-check-input[type="radio"]:checked {
+  background-color: gray;
+  border-color: none;
 }
 
-.disableForm{
-    pointer-events: none;
-    opacity: .4;
+.disableForm {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+html,
+body {
+  //   height: 100%;
+  //   margin: 0;
+}
+// #root {
+//   min-height: 100vh;
+//   //   display: flex;
+//   //   flex-direction: column;
+// }
+.min-height-100 {
+  min-height: 100vh;
 }

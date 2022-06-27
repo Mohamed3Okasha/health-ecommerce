@@ -11128,4 +11128,8 @@ textarea.form-control-lg {
   opacity: 0.4;
 }
 
+.min-height-100 {
+  min-height: 100vh;
+}
+
 /*# sourceMappingURL=style.css.map */
